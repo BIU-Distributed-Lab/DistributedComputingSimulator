@@ -7,7 +7,8 @@ This module initializes the network, runs the algorithms on each computer, and m
 import simulator.initializationModule as initializationModule
 import simulator.communication as communication
 
-def initiateRun(network: initializationModule.Initialization, comm : communication.Communication):
+
+def initiateRun(network: initializationModule.Initialization, comm: communication.Communication):
     """
     Runs the network algorithm on the created network.
 

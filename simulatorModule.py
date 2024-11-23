@@ -33,6 +33,7 @@ def load_network_variables():
     except (FileNotFoundError, json.JSONDecodeError):
         return {}
 
+
 def initializeSimulator():
     """
     Initializes the simulator by creating the network, communication instances, and loading network variables.
@@ -42,16 +43,17 @@ def initializeSimulator():
     """
     network_variables = load_network_variables()
     MainMenu.menu(network_variables)
-    
-    network= initializationModule.Initialization(network_variables)
-    if network.logging_type!="Short":
+
+    network = initializationModule.Initialization(network_variables)
+    if network.logging_type != "Short":
         print(network)
 
     comm = communication.Communication(network)
     return network, comm, network_variables
- 
- 
-def runSimulator(network: initializationModule.Initialization, comm:communication.Communication, network_variables: dict, start_time):
+
+
+def runSimulator(network: initializationModule.Initialization, comm: communication.Communication,
+                 network_variables: dict, start_time):
     """
     Runs the simulator based on user-provided network configuration and algorithm.
     
@@ -80,16 +82,14 @@ def runSimulator(network: initializationModule.Initialization, comm:communicatio
         print("--- Total Simulation Time : %s seconds ---" % (time.time() - start_time))
         print("--- Net Creation Time : %s seconds ---" % (net_creation_time))
         print("--- Algorithm Run Time : %s seconds ---" % (algorithm_run_time))
-        
 
 
-
-if __name__=="__main__":
+if __name__ == "__main__":
     """
     Main entry point for the simulator. Redirects standard output to a log file and runs the simulator.
     """
     sys.stdout = open(OUTPUT_FILE, "w")
     start_time = time.time()
     network, comm, network_variables = initializeSimulator()
-    
+
     runSimulator(network, comm, network_variables, start_time)

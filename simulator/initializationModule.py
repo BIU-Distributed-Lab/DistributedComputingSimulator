@@ -6,124 +6,14 @@ using different topologies (Tree, Star, Line, Clique, etc.). The module also han
 computer ID assignments, and delay creation for network edges.
 """
 import importlib
-import json
 import os
 import random
 import sys
-
-import numpy as np
-from simulator.computer import Computer
-import heapq
 import math
 
-class UnionFind:
-    """
-    A class to represent the Union-Find (Disjoint Set) data structure.
-    
-    Attributes:
-        parent (list): The parent pointers for each node.
-        rank (list): The rank of each tree (used for union by rank).
-    """
-
-    def __init__(self, size):
-        """
-        Initializes the Union-Find structure with a given size.
-        
-        Args:
-            size (int): Number of elements (nodes).
-        """
-        self.parent = list(range(size))
-        self.rank = [1] * size
-
-    def find(self, node):
-        """
-        Finds the root of the node with path compression.
-        
-        Args:
-            node (int): The node to find the root of.
-            
-        Returns:
-            int: The root of the node.
-        """
-        if self.parent[node] != node:
-            self.parent[node] = self.find(self.parent[node])  # Path compression
-        return self.parent[node]
-
-    def union(self, node1, node2):
-        """
-        Unites two sets by connecting the roots of the two nodes.
-        
-        Args:
-            node1 (int): First node.
-            node2 (int): Second node.
-        """
-        root1 = self.find(node1)
-        root2 = self.find(node2)
-
-        if root1 != root2:
-            # Union by rank
-            if self.rank[root1] > self.rank[root2]:
-                self.parent[root2] = root1
-            elif self.rank[root1] < self.rank[root2]:
-                self.parent[root1] = root2
-            else:
-                self.parent[root2] = root1
-                self.rank[root1] += 1
-
-
-class CustomMinHeap:
-    """
-    A class to represent a custom min-heap for managing messages.
-    
-    Attributes:
-        heap (list): A list used to represent the heap.
-        counter (int): A counter used to ensure unique priorities in the heap.
-    """
-
-    def __init__(self):
-        """
-        Initializes the custom min-heap.
-        """
-        self.heap = []
-        self.counter = 0  # unique sequence count
-        
-    def push(self, message_format):
-        """
-        Pushes a message onto the heap.
-        
-        Args:
-            message_format (dict): The message format containing arrival time.
-        """
-        heapq.heappush(self.heap, (message_format['arrival_time'], self.counter, message_format))
-        self.counter += 1
-        
-    def pop(self) -> dict:
-        """
-        Pops the message with the smallest arrival time from the heap.
-        
-        Returns:
-            dict: The message with the smallest arrival time.
-        """
-        priority, priority2, message_format = heapq.heappop(self.heap)
-        return message_format
-        
-    def empty(self) -> bool: 
-        """
-        Checks whether the heap is empty.
-        
-        Returns:
-            bool: True if the heap is empty, False otherwise.
-        """
-        return len(self.heap) == 0
-
-    def size(self) -> int:
-        """
-        Returns the size of the heap.
-        
-        Returns:
-            int: The number of elements in the heap.
-        """
-        return len(self.heap)
+from simulator.computer import Computer
+from simulator.data_structures.union_find import UnionFind
+from simulator.data_structures.custom_min_heap import CustomMinHeap
 
 
 class Initialization:
@@ -149,11 +39,11 @@ class Initialization:
         self.update_network_variables(network_variables)
         self.connected_computers = [Computer() for _ in range(self.computer_number)]
         self.message_queue = CustomMinHeap()
-        self.node_values_change = [] # for graph display
-        self.edges_delays = {} # holds the delays of each edge in the network
+        self.node_values_change = []  # for graph display
+        self.edges_delays = {}  # holds the delays of each edge in the network
 
         self.create_computer_ids()
-        
+
         self.network_dict = {}
         for comp in self.connected_computers:
             self.network_dict[comp.id] = comp
@@ -162,11 +52,10 @@ class Initialization:
         self.create_connected_computers()
         self.load_algorithms(self.algorithm_path)
         #self.delays_creation() # used for creating delays for edges, not used in current version     
-        
-        for comp in self.connected_computers: # resets the changed flag
+
+        for comp in self.connected_computers:  # resets the changed flag
             comp.reset_flag()
-        
-    
+
     def update_network_variables(self, network_variables_data):
         """
         Updates network parameters from the given configuration dictionary.
@@ -182,7 +71,7 @@ class Initialization:
         self.delay_type = network_variables_data.get('Delay', 'Random')
         self.algorithm_path = network_variables_data.get('Algorithm', 'no_alg_provided')
         self.logging_type = network_variables_data.get('Logging', 'Short')
-    
+
     def __str__(self) -> list:
         """
         Provides a string representation of the network configuration and connected computers.
@@ -191,20 +80,20 @@ class Initialization:
             str: The string representation of the network.
         """
         result = [
-        f"Number of Computers: {self.computer_number}",
-        f"Topology: {self.topologyType}",
-        f"ID Type: {self.id_type}",
-        f"Display Type: {self.display_type}",
-        f"Root Type: {self.root_type}",
-        f"Algorithm Path: {self.algorithm_path}",
-        f"Logging Type: {self.logging_type}",
+            f"Number of Computers: {self.computer_number}",
+            f"Topology: {self.topologyType}",
+            f"ID Type: {self.id_type}",
+            f"Display Type: {self.display_type}",
+            f"Root Type: {self.root_type}",
+            f"Algorithm Path: {self.algorithm_path}",
+            f"Logging Type: {self.logging_type}",
         ]
-            
+
         result.append("\nComputers:")
         result.extend(str(comp) for comp in self.connected_computers)
-        
+
         return "\n".join(result)
-            
+
     # used for creating delays for edges, not used in current version     
     """ def delays_creation(self):
         delay_functions = {
@@ -249,10 +138,10 @@ class Initialization:
             "Clique": self.create_clique_topology,
             "Tree": self.create_tree_topology,
             "Star": self.create_star_topology,
-            }
-        
+        }
+
         topology_function = topology_functions[self.topologyType]
-        
+
         # check network connectivity
         connected = False
         while not connected:
@@ -270,7 +159,8 @@ class Initialization:
 
         for node in self.connected_computers:
             for neighbor in node.connectedEdges:
-                uf.union(self.connected_computers.index(node), self.connected_computers.index(self.find_computer(neighbor)))
+                uf.union(self.connected_computers.index(node),
+                         self.connected_computers.index(self.find_computer(neighbor)))
 
         root = uf.find(0)
         return all(uf.find(i) == root for i in range(len(self.connected_computers)))
@@ -280,13 +170,12 @@ class Initialization:
         Creates IDs for the computers in the network based on the selected ID type.
         """
         id_functions = {
-        "Random": self.create_random_ids,
-        "Sequential": self.create_sequential_ids,
+            "Random": self.create_random_ids,
+            "Sequential": self.create_sequential_ids,
         }
-        
+
         id_function = id_functions[self.id_type]
         id_function()
-
 
     def create_random_ids(self):
         """
@@ -299,7 +188,7 @@ class Initialization:
                 comp_id = random.randint(100, 100 * self.computer_number - 1)
             comp.id = comp_id
             used_ids.add(comp_id)
-        
+
         # Sort the connected_computers list by their ids after assigning them
         self.connected_computers.sort(key=lambda x: x.id)
 
@@ -309,7 +198,6 @@ class Initialization:
         """
         for i, comp in enumerate(self.connected_computers):
             comp.id = i
-            
 
     def create_random_topology(self):
         """
@@ -359,7 +247,7 @@ class Initialization:
             # Remove duplicates
             for comp in self.connected_computers:
                 comp.connectedEdges = sorted(list(set(comp.connectedEdges)))
-        
+
         # Sort the connected_computers list by their ids (optional, if needed)
         self.connected_computers.sort(key=lambda x: x.id)
 
@@ -369,14 +257,14 @@ class Initialization:
         """
         for i in range(self.computer_number - 1):
             # Connect each computer to the next one in line
-            self.connected_computers[i].connectedEdges.append(self.connected_computers[i+1].id)
-            self.connected_computers[i + 1].connectedEdges.append(self.connected_computers[i].id)  # Ensure bi-directional connection
+            self.connected_computers[i].connectedEdges.append(self.connected_computers[i + 1].id)
+            self.connected_computers[i + 1].connectedEdges.append(
+                self.connected_computers[i].id)  # Ensure bi-directional connection
 
-
-    def create_clique_topology(self):     
+    def create_clique_topology(self):
         """
         Creates a clique topology for the network, where each computer is connected to every other computer.
-        """   
+        """
         # Connect each computer to every other computer
         for i in range(self.computer_number):
             for j in range(i + 1, self.computer_number):
@@ -386,8 +274,7 @@ class Initialization:
 
         # Removing duplicates
         for comp in self.connected_computers:
-            comp.connectedEdges = list(set(comp.connectedEdges)) 
-
+            comp.connectedEdges = list(set(comp.connectedEdges))
 
     def create_tree_topology(self):
         """
@@ -395,7 +282,7 @@ class Initialization:
         """
         # Generate a Prüfer sequence
         prufer_sequence = [random.choice(self.connected_computers) for _ in range(self.computer_number - 2)]
-        
+
         # sort the connected computers by id
         extra_list = sorted(self.connected_computers, key=lambda comp: comp.id)
 
@@ -404,7 +291,7 @@ class Initialization:
             for i in extra_list:
                 if len(extra_list) <= 2:
                     break
-                
+
                 if i not in prufer_sequence:
                     j = prufer_sequence[0]  # Always connect to the first node in S
                     i.connectedEdges.append(j.id)
@@ -417,7 +304,6 @@ class Initialization:
             extra_list[0].connectedEdges.append(extra_list[1].id)
             extra_list[1].connectedEdges.append(extra_list[0].id)
 
-      
     def create_star_topology(self):
         """
         Creates a star topology for the network, where all computers are connected to a central hub (root node).
@@ -429,13 +315,12 @@ class Initialization:
                 break
         if root is None:
             root = self.connected_computers[0]
-            
+
         # Connect all other nodes to the hub
         for comp in self.connected_computers:
             if comp.id != root.id:
                 root.connectedEdges.append(comp.id)
                 comp.connectedEdges.append(root.id)  # Ensure bi-directional connection
-
 
     def load_algorithms(self, algorithm_module_path):
         """
@@ -451,7 +336,7 @@ class Initialization:
         try:
             directory, file_name = os.path.split(algorithm_module_path)
             base_file_name, _ = os.path.splitext(file_name)
-            sys.path.insert(0,directory)
+            sys.path.insert(0, directory)
 
             algorithm_module = importlib.import_module(base_file_name)
             for comp in self.connected_computers:
@@ -467,10 +352,10 @@ class Initialization:
         """
         if self.root_type == "Random":
             selected_computer = random.choice(self.connected_computers)
-            selected_computer.is_root=True
-        elif self.root_type=="Min ID":
+            selected_computer.is_root = True
+        elif self.root_type == "Min ID":
             selected_computer = min(self.connected_computers, key=lambda computer: computer.id)
-            selected_computer.is_root=True
+            selected_computer.is_root = True
 
     def find_computer(self, id: int) -> Computer:
         """
@@ -487,9 +372,11 @@ class Initialization:
                 return comp
         return None
 
+
 def main():
     init = Initialization()
     init.toString()
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     main()

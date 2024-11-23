@@ -1,50 +1,47 @@
-Number of Computers: 8
-Topology: Tree
-ID Type: Sequential
+Number of Computers: 5
+Topology: Clique
+ID Type: Random
 Display Type: Graph
 Root Type: Min ID
-Algorithm Path: C:/Users/User/Desktop/DistributedNetworksProject-2/algorithms/BFSalgorithm.py
+Algorithm Path: ./algorithms/BFSalgorithm.py
 Logging Type: Long
 
 Computers:
-id = 0
-connected edges = [5, 7]
+id = 102
+connected edges = [120, 217, 396, 399]
 
-id = 1
-connected edges = [5]
+id = 120
+connected edges = [217, 396, 102, 399]
 
-id = 2
-connected edges = [3]
+id = 217
+connected edges = [120, 396, 102, 399]
 
-id = 3
-connected edges = [2, 4]
+id = 396
+connected edges = [120, 217, 102, 399]
 
-id = 4
-connected edges = [3, 6]
+id = 399
+connected edges = [120, 217, 396, 102]
 
-id = 5
-connected edges = [1, 6, 0]
-
-id = 6
-connected edges = [4, 5]
-
-id = 7
-connected edges = [0]
-
-0 is the root
+102 is the root
 ************************************************************************************
-{'source_id': 0, 'dest_id': 5, 'arrival_time': 1, 'content': 'running a BFS with distance 0 from 0'}
-{'source_id': 0, 'dest_id': 7, 'arrival_time': 1, 'content': 'running a BFS with distance 0 from 0'}
-{'source_id': 5, 'dest_id': 1, 'arrival_time': 2, 'content': 'running a BFS with distance 1.0 from 5'}
-{'source_id': 5, 'dest_id': 6, 'arrival_time': 2, 'content': 'running a BFS with distance 1.0 from 5'}
-{'source_id': 5, 'dest_id': 0, 'arrival_time': 2, 'content': 'running a BFS with distance 1.0 from 5'}
-{'source_id': 7, 'dest_id': 0, 'arrival_time': 2, 'content': 'running a BFS with distance 1.0 from 7'}
-{'source_id': 1, 'dest_id': 5, 'arrival_time': 3, 'content': 'running a BFS with distance 2.0 from 1'}
-{'source_id': 6, 'dest_id': 4, 'arrival_time': 3, 'content': 'running a BFS with distance 2.0 from 6'}
-{'source_id': 6, 'dest_id': 5, 'arrival_time': 3, 'content': 'running a BFS with distance 2.0 from 6'}
-{'source_id': 4, 'dest_id': 3, 'arrival_time': 4, 'content': 'running a BFS with distance 3.0 from 4'}
-{'source_id': 4, 'dest_id': 6, 'arrival_time': 4, 'content': 'running a BFS with distance 3.0 from 4'}
-{'source_id': 3, 'dest_id': 2, 'arrival_time': 5, 'content': 'running a BFS with distance 4.0 from 3'}
-{'source_id': 3, 'dest_id': 4, 'arrival_time': 5, 'content': 'running a BFS with distance 4.0 from 3'}
-{'source_id': 2, 'dest_id': 3, 'arrival_time': 6, 'content': 'running a BFS with distance 5.0 from 2'}
---- 0.37799811363220215 seconds ---
+{'source_id': 102, 'dest_id': 120, 'arrival_time': 1, 'content': 'running a BFS with distance 0 from 102'}
+{'source_id': 102, 'dest_id': 217, 'arrival_time': 1, 'content': 'running a BFS with distance 0 from 102'}
+{'source_id': 102, 'dest_id': 396, 'arrival_time': 1, 'content': 'running a BFS with distance 0 from 102'}
+{'source_id': 102, 'dest_id': 399, 'arrival_time': 1, 'content': 'running a BFS with distance 0 from 102'}
+{'source_id': 120, 'dest_id': 217, 'arrival_time': 2, 'content': 'running a BFS with distance 1.0 from 120'}
+{'source_id': 120, 'dest_id': 396, 'arrival_time': 2, 'content': 'running a BFS with distance 1.0 from 120'}
+{'source_id': 120, 'dest_id': 102, 'arrival_time': 2, 'content': 'running a BFS with distance 1.0 from 120'}
+{'source_id': 120, 'dest_id': 399, 'arrival_time': 2, 'content': 'running a BFS with distance 1.0 from 120'}
+{'source_id': 217, 'dest_id': 120, 'arrival_time': 2, 'content': 'running a BFS with distance 1.0 from 217'}
+{'source_id': 217, 'dest_id': 396, 'arrival_time': 2, 'content': 'running a BFS with distance 1.0 from 217'}
+{'source_id': 217, 'dest_id': 102, 'arrival_time': 2, 'content': 'running a BFS with distance 1.0 from 217'}
+{'source_id': 217, 'dest_id': 399, 'arrival_time': 2, 'content': 'running a BFS with distance 1.0 from 217'}
+{'source_id': 396, 'dest_id': 120, 'arrival_time': 2, 'content': 'running a BFS with distance 1.0 from 396'}
+{'source_id': 396, 'dest_id': 217, 'arrival_time': 2, 'content': 'running a BFS with distance 1.0 from 396'}
+{'source_id': 396, 'dest_id': 102, 'arrival_time': 2, 'content': 'running a BFS with distance 1.0 from 396'}
+{'source_id': 396, 'dest_id': 399, 'arrival_time': 2, 'content': 'running a BFS with distance 1.0 from 396'}
+{'source_id': 399, 'dest_id': 120, 'arrival_time': 2, 'content': 'running a BFS with distance 1.0 from 399'}
+{'source_id': 399, 'dest_id': 217, 'arrival_time': 2, 'content': 'running a BFS with distance 1.0 from 399'}
+{'source_id': 399, 'dest_id': 396, 'arrival_time': 2, 'content': 'running a BFS with distance 1.0 from 399'}
+{'source_id': 399, 'dest_id': 102, 'arrival_time': 2, 'content': 'running a BFS with distance 1.0 from 399'}
+--- total simulation time : 6.154593467712402 seconds ---
