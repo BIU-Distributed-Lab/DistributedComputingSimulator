@@ -29,3 +29,30 @@ def initiateRun(network: initializationModule.Initialization, comm: communicatio
     while not network.message_queue.empty():
         message = network.message_queue.pop()
         comm.receive_message(message, comm)
+
+
+
+## async
+
+#dasdasdasda
+## sync
+
+
+        # round = 0
+        # allterminated = len(network.connected_computers)
+        # while(not allterminated):
+        #     allterminated = len(network.connected_computers)
+        #     ## extract all messages from set
+        #     messages = comm.set.get_messages
+        #     ## clean the set
+        #
+        #     for comp in network.connected_computers:
+        #             if comp.state == "terminated":
+        #                 allterminated -= 1
+        #                 continue
+        #             messages[comp.id]
+        #             comm.run_algorithmm(comp, 'mainAlgorithm', round, messages)
+        #         round += 1
+
+
+
