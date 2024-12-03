@@ -14,6 +14,7 @@ import math
 from simulator.computer import Computer
 from simulator.data_structures.union_find import UnionFind
 from simulator.data_structures.custom_min_heap import CustomMinHeap
+from simulator.data_structures.custom_set import CustomSet
 
 
 class Initialization:
@@ -38,7 +39,12 @@ class Initialization:
         """
         self.update_network_variables(network_variables)
         self.connected_computers = [Computer() for _ in range(self.computer_number)]
-        self.message_queue = CustomMinHeap()
+
+        if network_variables['Sync'] == "True":
+            self.message_queue = CustomSet()
+        else:
+            self.message_queue = CustomMinHeap()
+
         self.node_values_change = []  # for graph display
         self.edges_delays = {}  # holds the delays of each edge in the network
 

@@ -8,7 +8,7 @@ import simulator.initializationModule as initializationModule
 import simulator.communication as communication
 
 
-def initiateRun(network: initializationModule.Initialization, comm: communication.Communication):
+def initiateRun(network: initializationModule.Initialization, comm: communication.Communication, sync: bool):
     """
     Runs the network algorithm on the created network.
 
@@ -19,9 +19,26 @@ def initiateRun(network: initializationModule.Initialization, comm: communicatio
         network (Initialization): The initialized network with connected computers.
         comm (Communication): The communication object handling message passing between computers.
     """
+    if sync:
+        sync_run(network, comm)
+    else:
+        async_run(network, comm)
+
+
+def async_run(network: initializationModule.Initialization, comm: communication.Communication):
+    """
+    Runs the network algorithm asynchronously on the created network.
+
+    This function runs the `init` function on every computer in the network, enqueues messages,
+    and processes the messages by running the main algorithm until the message queue is empty.
+
+    Args:
+        network (Initialization): The initialized network with connected computers.
+        comm (Communication): The communication object handling message passing between computers.
+    """
     # runs init() for every computer which must be defined, and puting messages into the network queue
     for comp in network.connected_computers:
-        comm.run_algorithmm(comp, 'init')
+        comm.run_algorithm(comp, 'init')
 
     print("************************************************************************************")
 
@@ -30,29 +47,25 @@ def initiateRun(network: initializationModule.Initialization, comm: communicatio
         message = network.message_queue.pop()
         comm.receive_message(message, comm)
 
+def sync_run(network: initializationModule.Initialization, comm: communication.Communication):
+    current_round = 0
+    all_terminated = len(network.connected_computers)
 
+    while all_terminated > 0:
+        all_terminated = len(network.connected_computers)
 
-## async
+        # Extract all messages from set
+        current_messages_set = network.message_queue.get_all_messages()
+        # Clean the set
+        network.message_queue.clear()
 
-#dasdasdasda
-## sync
+        for comp in network.connected_computers:
+            if comp.state == "terminated":
+                all_terminated -= 1
+                continue
 
+            # Filter messages destined for the current computer and extract content
+            current_messages = [msg['content'] for msg in current_messages_set if msg['dest_id'] == comp.id]
+            comm.run_algorithm(comp, 'mainAlgorithm', current_round, current_messages)
 
-        # round = 0
-        # allterminated = len(network.connected_computers)
-        # while(not allterminated):
-        #     allterminated = len(network.connected_computers)
-        #     ## extract all messages from set
-        #     messages = comm.set.get_messages
-        #     ## clean the set
-        #
-        #     for comp in network.connected_computers:
-        #             if comp.state == "terminated":
-        #                 allterminated -= 1
-        #                 continue
-        #             messages[comp.id]
-        #             comm.run_algorithmm(comp, 'mainAlgorithm', round, messages)
-        #         round += 1
-
-
-
+        current_round += 1

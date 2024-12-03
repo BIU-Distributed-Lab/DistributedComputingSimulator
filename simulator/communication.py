@@ -83,9 +83,9 @@ class Communication:
 
         received_id = message['dest_id']
         received_computer = self.network.network_dict.get(received_id)
-        self.run_algorithmm(received_computer, 'mainAlgorithm', message['arrival_time'], message['content'])
+        self.run_algorithm(received_computer, 'mainAlgorithm', message['arrival_time'], message['content'])
 
-    def run_algorithmm(self, comp: Computer, function_name: str, arrival_time=None, message_content=None):
+    def run_algorithm(self, comp: Computer, function_name: str, arrival_time=None, message_content=None):
         """
         Runs the specified algorithm on the given computer, handling the provided message content and arrival time.
         

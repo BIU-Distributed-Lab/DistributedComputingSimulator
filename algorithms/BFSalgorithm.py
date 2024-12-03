@@ -13,19 +13,21 @@ The following data exists for every computer:
 colors = ["blue", "red", "green", "yellow", "purple", "pink", "orange", "cyan", "magenta", "lime", "teal", "lavender",
           "brown", "maroon", "navy", "olive", "coral", "salmon", "gold", "silver"]
 
-def mainAlgorithm(self: computer.Computer, communication: Communication, _arrival_time, message = None):
+
+def mainAlgorithm(self: computer.Computer, communication: Communication, _arrival_time, message=None):
     message_parts = message.split(" ")
     dist = float(message_parts[-3])
     parent = int(message_parts[-1])
-    
+
     if dist + 1 < self.distance:
         self.parent = parent
         self.distance = dist + 1
         color_index = int(dist) % len(colors)
         self.color = colors[color_index]
         communication.send_to_all(self.id, f"running a BFS with distance {self.distance} from {self.id}", _arrival_time)
-            
-def init(self: computer.Computer, communication : Communication):
+
+
+def init(self: computer.Computer, communication: Communication):
     if self.is_root:
         print(f"{self.id} is the root")
         self.parent = self.id
@@ -36,16 +38,3 @@ def init(self: computer.Computer, communication : Communication):
     else:
         self.parent = None
         self.distance = np.inf
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
