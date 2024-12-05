@@ -8,6 +8,8 @@ import random
 from simulator.computer import Computer
 import simulator.initializationModule as initializationModule
 
+TERMINATED_STATE = "terminated"
+
 
 class Communication:
     """
@@ -41,9 +43,10 @@ class Communication:
         """
         current_computer = self.network.network_dict.get(source)
 
-        dest_computer_terminated = self.network.network_dict.get(dest).state == "terminated"
+        current_computer_terminated = current_computer.state == TERMINATED_STATE
+        dest_computer_terminated = self.network.network_dict.get(dest).state == TERMINATED_STATE
 
-        if not current_computer.state == "terminated" and not dest_computer_terminated:
+        if not current_computer_terminated and not dest_computer_terminated:
             # creating a new message which will be put into the queue
             if sent_time is None:
                 sent_time = 0
