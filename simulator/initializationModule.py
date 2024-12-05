@@ -15,6 +15,7 @@ from simulator.computer import Computer
 from simulator.data_structures.union_find import UnionFind
 from simulator.data_structures.custom_min_heap import CustomMinHeap
 from simulator.data_structures.custom_set import CustomSet
+from simulator.data_structures.custom_dict import CustomDict
 
 
 class Initialization:
@@ -41,7 +42,7 @@ class Initialization:
         self.connected_computers = [Computer() for _ in range(self.computer_number)]
 
         if network_variables['Sync'] == "True":
-            self.message_queue = CustomSet()
+            self.message_queue = CustomDict()
         else:
             self.message_queue = CustomMinHeap()
 

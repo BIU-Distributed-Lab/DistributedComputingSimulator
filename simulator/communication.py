@@ -30,6 +30,8 @@ class Communication:
     def send_message(self, source, dest, message_info, sent_time=None):
         """
         Sends a message from the source computer to the destination computer, with optional arrival time.
+        if the destination computer is terminated, the message will not be sent.
+        if the source computer is terminated, the message will not be sent.
         
         Args:
             source (int): The ID of the source computer sending the message.
@@ -39,7 +41,9 @@ class Communication:
         """
         current_computer = self.network.network_dict.get(source)
 
-        if not current_computer.state == "terminated":
+        dest_computer_terminated = self.network.network_dict.get(dest).state == "terminated"
+
+        if not current_computer.state == "terminated" and not dest_computer_terminated:
             # creating a new message which will be put into the queue
             if sent_time is None:
                 sent_time = 0

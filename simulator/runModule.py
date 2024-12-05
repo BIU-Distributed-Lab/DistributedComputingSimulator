@@ -47,6 +47,7 @@ def async_run(network: initializationModule.Initialization, comm: communication.
         message = network.message_queue.pop()
         comm.receive_message(message, comm)
 
+
 def sync_run(network: initializationModule.Initialization, comm: communication.Communication):
     current_round = 0
     all_terminated = len(network.connected_computers)
@@ -54,18 +55,15 @@ def sync_run(network: initializationModule.Initialization, comm: communication.C
     while all_terminated > 0:
         all_terminated = len(network.connected_computers)
 
-        # Extract all messages from set
-        current_messages_set = network.message_queue.get_all_messages()
-        # Clean the set
-        network.message_queue.clear()
-
         for comp in network.connected_computers:
             if comp.state == "terminated":
                 all_terminated -= 1
                 continue
 
-            # Filter messages destined for the current computer and extract content
-            current_messages = [msg['content'] for msg in current_messages_set if msg['dest_id'] == comp.id]
+            # Get messages for the current computer from the dictionary and clear the key
+            current_messages = network.message_queue.get_messages_for_specific_dest(comp.id)
+            network.message_queue.clear_key(comp.id)
+
             comm.run_algorithm(comp, 'mainAlgorithm', current_round, current_messages)
 
         current_round += 1

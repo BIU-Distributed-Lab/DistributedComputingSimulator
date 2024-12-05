@@ -20,7 +20,7 @@ def mainAlgorithm(self: computer.Computer, communication: Communication, round, 
             self.parent = None
     else:
         for message in messages:
-            message_parts = message.split(" ")
+            message_parts = message["content"].split(" ")
             dist = float(message_parts[1])
             parent = int(message_parts[2])
 
