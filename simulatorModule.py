@@ -71,13 +71,13 @@ def runSimulator(network: initializationModule.Initialization, comm: communicati
     if network_variables['Display'] == "Graph":
         app = QApplication(sys.argv)
         graphVisualization.visualize_network(network, comm)
-        thread = threading.Thread(target=runModule.initiateRun, args=(network, comm))
+        thread = threading.Thread(target=runModule.initiateRun, args=(network, comm, network_variables['Sync']))
         thread.start()
         thread.join()
         print("--- total simulation time : %s seconds ---" % (time.time() - start_time))
         sys.exit(app.exec_())
     else:
-        runModule.initiateRun(network, comm)
+        runModule.initiateRun(network, comm, network_variables['Sync'])
         algorithm_run_time = time.time() - start_time - net_creation_time
         print("--- Total Simulation Time : %s seconds ---" % (time.time() - start_time))
         print("--- Net Creation Time : %s seconds ---" % (net_creation_time))

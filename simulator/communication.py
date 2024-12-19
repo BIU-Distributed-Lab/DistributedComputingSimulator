@@ -8,6 +8,8 @@ import random
 from simulator.computer import Computer
 import simulator.initializationModule as initializationModule
 
+TERMINATED_STATE = "terminated"
+
 
 class Communication:
     """
@@ -30,6 +32,8 @@ class Communication:
     def send_message(self, source, dest, message_info, sent_time=None):
         """
         Sends a message from the source computer to the destination computer, with optional arrival time.
+        if the destination computer is terminated, the message will not be sent.
+        if the source computer is terminated, the message will not be sent.
         
         Args:
             source (int): The ID of the source computer sending the message.
@@ -39,7 +43,10 @@ class Communication:
         """
         current_computer = self.network.network_dict.get(source)
 
-        if not current_computer.state == "terminated":
+        current_computer_terminated = current_computer.state == TERMINATED_STATE
+        dest_computer_terminated = self.network.network_dict.get(dest).state == TERMINATED_STATE
+
+        if not current_computer_terminated and not dest_computer_terminated:
             # creating a new message which will be put into the queue
             if sent_time is None:
                 sent_time = 0
@@ -83,9 +90,9 @@ class Communication:
 
         received_id = message['dest_id']
         received_computer = self.network.network_dict.get(received_id)
-        self.run_algorithmm(received_computer, 'mainAlgorithm', message['arrival_time'], message['content'])
+        self.run_algorithm(received_computer, 'mainAlgorithm', message['arrival_time'], message['content'])
 
-    def run_algorithmm(self, comp: Computer, function_name: str, arrival_time=None, message_content=None):
+    def run_algorithm(self, comp: Computer, function_name: str, arrival_time=None, message_content=None):
         """
         Runs the specified algorithm on the given computer, handling the provided message content and arrival time.
         

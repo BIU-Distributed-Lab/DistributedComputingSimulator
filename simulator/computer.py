@@ -51,6 +51,8 @@ class Computer:
         # Only set the flag if the attribute is not private
         if not name.startswith('_') and getattr(self, name, None) != value:
             self._has_changed = True
+            # print the id and what is changing
+            print(f"Computer {self.id} is changing {name} to {value}")
         super().__setattr__(name, value)
 
     def reset_flag(self):
