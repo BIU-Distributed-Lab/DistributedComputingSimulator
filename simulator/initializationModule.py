@@ -36,25 +36,61 @@ class Initialization:
         Args:
             network_variables (dict): The network configuration dictionary.
         """
+        ## if network_variables.topology_file
+        ##      self.parse_topology_file(file_path)
+        ##      self.build toplogy
+        ##      self.root_selection()
+        ## else:
+        ##    self.update_network_variables(network_variables)
+        ##
+
+
         self.update_network_variables(network_variables)
+
+        # use in custom
         self.connected_computers = [Computer() for _ in range(self.computer_number)]
+
+        # always
         self.message_queue = CustomMinHeap()
         self.node_values_change = []  # for graph display
         self.edges_delays = {}  # holds the delays of each edge in the network
 
+        # no use in custom
         self.create_computer_ids()
 
+        # always
         self.network_dict = {}
         for comp in self.connected_computers:
             self.network_dict[comp.id] = comp
+
+        # no use in custom
         self.root_selection()
-
         self.create_connected_computers()
-        self.load_algorithms(self.algorithm_path)
-        #self.delays_creation() # used for creating delays for edges, not used in current version     
 
+        # always
+        self.load_algorithms(self.algorithm_path)
+
+        # self.delays_creation() # used for creating delays for edges, not used in current version
+
+
+        # always
         for comp in self.connected_computers:  # resets the changed flag
             comp.reset_flag()
+
+    def parse_topology_file(self, file_path):
+        """
+        Parses a topology file to create the network topology.
+
+        Args:
+            file_path (str): The file path to the topology file.
+        """
+        with open(file_path, 'r') as f:
+            lines = f.readlines()
+        #self.topologyType = 'Custom'
+
+        ## read lines in file and parse into network variables
+
+
 
     def update_network_variables(self, network_variables_data):
         """

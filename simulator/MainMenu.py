@@ -239,9 +239,6 @@ class MenuWindow(QMainWindow):
 
         combo_box.currentTextChanged.connect(lambda value: self.update_value(label_text, value))
 
-
-    
-    
     def on_upload_algorithm(self):
         """
         Handle the upload of a Python algorithm file.
@@ -254,7 +251,6 @@ class MenuWindow(QMainWindow):
                 self.update_value("Algorithm", fname)
             else:
                 QMessageBox.warning(self, 'Error', 'Please select a Python file (.py)', QMessageBox.Ok)
-
 
     def on_upload_topology(self):
         """
@@ -272,6 +268,9 @@ class MenuWindow(QMainWindow):
             else:
                 QMessageBox.warning(self, 'Error', 'Please select a text file (.txt)', QMessageBox.Ok)
 
+
+
+
     def on_delete_topology_file(self):
         """
         Handle the deletion of the uploaded topology file.
@@ -285,7 +284,6 @@ class MenuWindow(QMainWindow):
             self.combo_boxes["Root"].setEnabled(True)
             self.combo_boxes["ID Type"].setCurrentText("")
             self.combo_boxes["ID Type"].setEnabled(True)
-
 
     def handle_custom_topology(self):
         self.combo_boxes["Topology"].setCurrentText("Custom")
