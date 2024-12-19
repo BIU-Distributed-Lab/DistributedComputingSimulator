@@ -86,22 +86,22 @@ def layoutCreation(self):
 
     buttons_layout = QGridLayout()
     self.next_phase_button = QPushButton("Next Phase")
-    self.next_phase_button.setFixedSize(120, 40)
+    self.next_phase_button.setFixedSize(300, 40)
     set_button_style(self.next_phase_button, normal_button_style, pressed_button_style)
     self.next_phase_button.clicked.connect(lambda: self.change_node_color(1))
 
     self.next_5_phase_button = QPushButton("Next 5 Phases")
-    self.next_5_phase_button.setFixedSize(120, 40)
+    self.next_5_phase_button.setFixedSize(300, 40)
     set_button_style(self.next_5_phase_button, normal_button_style, pressed_button_style)
     self.next_5_phase_button.clicked.connect(lambda: self.change_node_color(5))
 
     self.undo_button = QPushButton('Undo', self)
-    self.undo_button.setFixedSize(120, 40)
+    self.undo_button.setFixedSize(300, 40)
     set_button_style(self.undo_button, normal_button_style, pressed_button_style)
     self.undo_button.clicked.connect(self.undo_change)
 
     self.reset_button = QPushButton('Reset', self)
-    self.reset_button.setFixedSize(120, 40)
+    self.reset_button.setFixedSize(300, 40)
     set_button_style(self.reset_button, normal_button_style, pressed_button_style)
     self.reset_button.clicked.connect(self.reset)
 
