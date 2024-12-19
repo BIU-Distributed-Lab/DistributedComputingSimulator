@@ -52,7 +52,7 @@ class Initialization:
         # use in custom
         self.connected_computers = [Computer() for _ in range(self.computer_number)]
 
-        if network_variables['Sync'] == "True":
+        if network_variables['Sync'] == "Sync":
             self.message_queue = CustomDict()
         else:
             # always
