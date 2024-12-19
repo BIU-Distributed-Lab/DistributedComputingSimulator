@@ -16,6 +16,32 @@ from PyQt5.QtCore import Qt, QTimer, QPointF
 from visualizations.edge import Edge
 
 
+# Define the normal and pressed styles
+normal_button_style = """
+    QPushButton {
+        padding: 5px; 
+        font-size: 14px; 
+        background-color: lightblue;
+    }
+"""
+pressed_button_style = """
+    QPushButton {
+        padding: 5px; 
+        font-size: 14px; 
+        background-color: darkblue;
+        color: white;
+    }
+"""
+
+
+def set_button_style(button, normal_style, pressed_style):
+    button.setStyleSheet(normal_style)
+    button.pressed.connect(lambda: button.setStyleSheet(pressed_style))
+    button.released.connect(lambda: button.setStyleSheet(normal_style))
+
+
+
+
 def layoutCreation(self):
     """
     Create and configure the graph visualization layout.
@@ -56,26 +82,27 @@ def layoutCreation(self):
     slider_h_layout.addWidget(self.run_checkbox)
     slider_h_layout.addWidget(run_label)
     slider_h_layout.addWidget(self.slider)
+    slider_h_layout.addWidget(self.slider_label)
 
     buttons_layout = QGridLayout()
     self.next_phase_button = QPushButton("Next Phase")
     self.next_phase_button.setFixedSize(120, 40)
-    self.next_phase_button.setStyleSheet("padding: 5px; font-size: 14px; background-color: lightblue;")
+    set_button_style(self.next_phase_button, normal_button_style, pressed_button_style)
     self.next_phase_button.clicked.connect(lambda: self.change_node_color(1))
 
     self.next_5_phase_button = QPushButton("Next 5 Phases")
     self.next_5_phase_button.setFixedSize(120, 40)
-    self.next_5_phase_button.setStyleSheet("padding: 5px; font-size: 14px; background-color: lightblue;")
+    set_button_style(self.next_5_phase_button, normal_button_style, pressed_button_style)
     self.next_5_phase_button.clicked.connect(lambda: self.change_node_color(5))
 
     self.undo_button = QPushButton('Undo', self)
     self.undo_button.setFixedSize(120, 40)
-    self.undo_button.setStyleSheet("padding: 5px; font-size: 14px; background-color: lightblue;")
+    set_button_style(self.undo_button, normal_button_style, pressed_button_style)
     self.undo_button.clicked.connect(self.undo_change)
 
     self.reset_button = QPushButton('Reset', self)
     self.reset_button.setFixedSize(120, 40)
-    self.reset_button.setStyleSheet("padding: 5px; font-size: 14px; background-color: lightblue;")
+    set_button_style(self.reset_button, normal_button_style, pressed_button_style)
     self.reset_button.clicked.connect(self.reset)
 
     buttons_layout.addWidget(self.slider_label, 0, 0, 1, 2)  # Move slider label above the line
