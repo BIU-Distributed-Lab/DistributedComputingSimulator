@@ -13,13 +13,14 @@ import os
 
 # Constants 
 NETWORK_VARIABLES = 'network_variables.json'
-CHECKBOX_LAYOUT_GEOMETRY = (800, 100, 500, 600)
+CHECKBOX_LAYOUT_GEOMETRY = (800, 90, 500, 800)
 COMBOBOX_OPTIONS = {
-    "Topology": "Random, Clique, Line, Tree, Star",
-    "ID Type": "Random, Sequential",
+    "Sync": "Sync, Async",
+    "Topology": "Random, Clique, Line, Tree, Star, Custom",
+    "ID Type": "Random, Sequential, Custom",
     "Delay": "Random, Constant",
     "Display": "Text, Graph",
-    "Root": "No Root, Min ID, Random",
+    "Root": "No Root, Min ID, Random, Custom",
     "Logging": "Short, Medium, Long",
 }
 
@@ -56,6 +57,7 @@ class MenuWindow(QMainWindow):
         """
         super().__init__()
         ##self.network_variables_file = network_variables_file
+        self.combo_boxes = {}
         self.checkbox_values = network_variables_data # Dictionary to store checkbox values with default values
         self.setGeometry(0, 0, 1500, 900)
         self.setWindowTitle("Simulator for Distributed Networks")
@@ -86,7 +88,7 @@ class MenuWindow(QMainWindow):
             self.validate_display_type()
 
         if key in self.label_values:
-            self.label_values[key].setText(f"{key}: {value}")
+            self.label_values[key].setText(f"{key}: <span style='color: blue;'>{value}</span>")
             self.label_values[key].setWordWrap(True)
 
 
@@ -94,11 +96,11 @@ class MenuWindow(QMainWindow):
         """
         Create labels for displaying the network variable values.
         """
-        y_offset = 200
+        y_offset = 300
         for key, value in self.checkbox_values.items():
-            label = QLabel(f"{key}: {value}", self)
+            label = QLabel(f"{key}: <span style='color: blue;'>{value}</span>", self)
             label.setGeometry(50, y_offset, 1000, 30)
-            y_offset += 50
+            y_offset += 62
             self.label_values[key] = label
             self.label_values[key].setWordWrap(True)
 
@@ -111,19 +113,38 @@ class MenuWindow(QMainWindow):
         info_label.setText("Please upload your Python algorithm file:")
         info_label.move(50, 100)
         info_label.resize(650, 50)
+        info_label.setStyleSheet("color: blue;")  # Set the color of the info label to blue
 
+        info_label = QLabel(self)
+        info_label.setText("Please upload your topology file:")
+        info_label.move(50, 200)
+        info_label.resize(650, 50)
+        info_label.setStyleSheet("color: blue;")  # Set the color of the info label to blue
 
+    def get_button_color(self,button):
+        palette = button.palette()
+        color = palette.color(QPalette.Button)
+        return color.name()  # Returns the color in hex format, e.g., "#f0f0f0"
 
     def create_buttons(self):
         """
         Create buttons for uploading a Python file and submitting the form.
         """
-        upload_file_button = QPushButton("Upload Python File", self)
-        upload_file_button.setGeometry(50, 150, 200, 30)
-        upload_file_button.clicked.connect(lambda: self.on_upload_algorithm())
+        upload_algorithm_file_button = QPushButton("Upload Python File", self)
+        upload_algorithm_file_button.setGeometry(50, 150, 200, 30)
+        upload_algorithm_file_button.clicked.connect(lambda: self.on_upload_algorithm())
+
+        upload__topology_file_button = QPushButton("Upload Topology File", self)
+        upload__topology_file_button.setGeometry(50, 250, 200, 30)
+        upload__topology_file_button.clicked.connect(lambda: self.on_upload_topology())
+
+        trash_button = QPushButton("Reset", self)
+        trash_button.setGeometry(260, 250, 30, 30)
+        trash_button.clicked.connect(lambda: self.on_delete_topology_file())
+
 
         self.submit_button = QPushButton("Submit", self) 
-        self.submit_button.setGeometry(550, 750, 150, 30)
+        self.submit_button.setGeometry(550, 900, 150, 30)
         self.submit_button.clicked.connect(lambda: self.on_submit_all())
 
 
@@ -135,7 +156,7 @@ class MenuWindow(QMainWindow):
         checkbox_layout = QVBoxLayout()
         
         self.add_number_input(checkbox_layout)  # adding the number of computers option
-        
+
         for key, options in COMBOBOX_OPTIONS.items():
             self.add_combo_box(checkbox_layout, key, options)
 
@@ -191,7 +212,10 @@ class MenuWindow(QMainWindow):
             self.submit_button.setEnabled(False)
         else:
             self.submit_button.setEnabled(True)
-    
+
+
+
+
     def add_combo_box(self, layout, label_text, options):
         """
         Add a combo box to the layout for selecting various options like topology, delay, etc.
@@ -211,6 +235,8 @@ class MenuWindow(QMainWindow):
         combo_box.setCurrentText("")
         layout.addWidget(combo_box)
 
+        self.combo_boxes[label_text] = combo_box
+
         combo_box.currentTextChanged.connect(lambda value: self.update_value(label_text, value))
 
 
@@ -229,14 +255,57 @@ class MenuWindow(QMainWindow):
             else:
                 QMessageBox.warning(self, 'Error', 'Please select a Python file (.py)', QMessageBox.Ok)
 
-   
+
+    def on_upload_topology(self):
+        """
+        Handle the upload of a topology file.
+        """
+        fname, _ = QFileDialog.getOpenFileName(self, 'Upload Text File', '/home', "Text Files (*.txt)")
+        if fname:
+            _, file_extension = os.path.splitext(fname)
+            if file_extension.lower() == '.txt':
+                print("file name", fname)
+                self.checkbox_values["Topology File"] = fname
+                self.update_value("Topology File", fname)
+                self.handle_custom_topology()
+
+            else:
+                QMessageBox.warning(self, 'Error', 'Please select a text file (.txt)', QMessageBox.Ok)
+
+    def on_delete_topology_file(self):
+        """
+        Handle the deletion of the uploaded topology file.
+        """
+        if self.checkbox_values["Topology File"]:
+            self.checkbox_values["Topology File"] = ""
+            self.update_value("Topology File", "")
+            self.combo_boxes["Topology"].setCurrentText("")
+            self.combo_boxes["Topology"].setEnabled(True)
+            self.combo_boxes["Root"].setCurrentText("")
+            self.combo_boxes["Root"].setEnabled(True)
+            self.combo_boxes["ID Type"].setCurrentText("")
+            self.combo_boxes["ID Type"].setEnabled(True)
+
+
+    def handle_custom_topology(self):
+        self.combo_boxes["Topology"].setCurrentText("Custom")
+        self.combo_boxes["Topology"].setEnabled(False)
+        self.combo_boxes["Root"].setCurrentText("Custom")
+        self.combo_boxes["Root"].setEnabled(False)
+        self.combo_boxes["ID Type"].setCurrentText("Custom")
+        self.combo_boxes["ID Type"].setEnabled(False)
+
     def on_submit_all(self):
         """
         Handle the final submission of all settings and save them to a JSON file.
         """
+        if any([value == "" for key, value in self.checkbox_values.items() if key != "Topology File"]):
+            QMessageBox.warning(self, 'Error', 'Please fill in all the fields before submitting.', QMessageBox.Ok)
+            return
         with open(NETWORK_VARIABLES, "w") as f:
             json.dump(self.checkbox_values, f, indent=4)
         self.close()
+
 
 def menu(network_variables: dict):
     """

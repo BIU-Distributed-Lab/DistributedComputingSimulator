@@ -29,12 +29,12 @@ def layoutCreation(self):
     self.choice_combo.addItems(self.get_nx_layouts())
     self.choice_combo.currentTextChanged.connect(self.set_nx_layout)
 
-    self.regenarate_button = QPushButton("regenarate")
-    self.regenarate_button.clicked.connect(self.regenarate_clicked)
+    # self.regenarate_button = QPushButton("regenarate")
+    # self.regenarate_button.clicked.connect(self.regenarate_clicked)
 
     main_layout = QVBoxLayout(self)
-    main_layout.addWidget(self.choice_combo)
-    main_layout.addWidget(self.regenarate_button)
+    # main_layout.addWidget(self.choice_combo)
+    # main_layout.addWidget(self.regenarate_button)
     main_layout.addWidget(self.view)
 
     slider_h_layout = QHBoxLayout()
@@ -59,19 +59,30 @@ def layoutCreation(self):
 
     buttons_layout = QGridLayout()
     self.next_phase_button = QPushButton("Next Phase")
+    self.next_phase_button.setFixedSize(120, 40)
+    self.next_phase_button.setStyleSheet("padding: 5px; font-size: 14px; background-color: lightblue;")
     self.next_phase_button.clicked.connect(lambda: self.change_node_color(1))
+
     self.next_5_phase_button = QPushButton("Next 5 Phases")
+    self.next_5_phase_button.setFixedSize(120, 40)
+    self.next_5_phase_button.setStyleSheet("padding: 5px; font-size: 14px; background-color: lightblue;")
     self.next_5_phase_button.clicked.connect(lambda: self.change_node_color(5))
+
     self.undo_button = QPushButton('Undo', self)
+    self.undo_button.setFixedSize(120, 40)
+    self.undo_button.setStyleSheet("padding: 5px; font-size: 14px; background-color: lightblue;")
     self.undo_button.clicked.connect(self.undo_change)
+
     self.reset_button = QPushButton('Reset', self)
+    self.reset_button.setFixedSize(120, 40)
+    self.reset_button.setStyleSheet("padding: 5px; font-size: 14px; background-color: lightblue;")
     self.reset_button.clicked.connect(self.reset)
 
-    buttons_layout.addWidget(self.next_phase_button, 0, 0)
-    buttons_layout.addWidget(self.next_5_phase_button, 0, 1)
-    buttons_layout.addWidget(self.undo_button, 1, 0)
-    buttons_layout.addWidget(self.reset_button, 1, 1)
-    buttons_layout.addWidget(self.slider_label, 0, 2)
+    buttons_layout.addWidget(self.slider_label, 0, 0, 1, 2)  # Move slider label above the line
+    buttons_layout.addWidget(self.next_phase_button, 1, 0)
+    buttons_layout.addWidget(self.next_5_phase_button, 1, 1)
+    buttons_layout.addWidget(self.undo_button, 2, 0)
+    buttons_layout.addWidget(self.reset_button, 2, 1)
 
     # Add the horizontal layouts to the main layout
     main_layout.addLayout(slider_h_layout)
