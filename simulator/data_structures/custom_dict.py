@@ -21,9 +21,13 @@ class CustomDict:
             message_format (dict): The message format to add.
         """
         dest_id = message_format['dest_id']
-        if dest_id not in self.dict:
-            self.dict[dest_id] = []
-        self.dict[dest_id].append(message_format)
+        round = message_format['arrival_time']
+        key = (dest_id, round)
+
+        if key not in self.dict:
+            self.dict[key] = []
+        self.dict[key].append(message_format)
+
 
     def remove(self, message_format):
         """
@@ -75,7 +79,7 @@ class CustomDict:
         """
         self.dict.clear()
 
-    def get_messages_for_specific_dest(self, dest_id):
+    def get_messages_for_specific_dest(self, dest_id, current_round):
         """
         Returns all messages in the dictionary for a specific destination ID.
         if dest_id is not in the dictionary, return an empty list.
@@ -86,7 +90,8 @@ class CustomDict:
         Returns:
             list: A list of messages for the specified destination ID.
         """
-        return self.dict.get(dest_id, [])
+        key = (dest_id, current_round)
+        return self.dict.get(key, [])
 
     def clear_key(self, dest_id):
         """

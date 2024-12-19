@@ -61,7 +61,7 @@ def sync_run(network: initializationModule.Initialization, comm: communication.C
                 continue
 
             # Get messages for the current computer from the dictionary and clear the key
-            current_messages = network.message_queue.get_messages_for_specific_dest(comp.id)
+            current_messages = network.message_queue.get_messages_for_specific_dest(comp.id, current_round)
             network.message_queue.clear_key(comp.id)
 
             comm.run_algorithm(comp, 'mainAlgorithm', current_round, current_messages)
