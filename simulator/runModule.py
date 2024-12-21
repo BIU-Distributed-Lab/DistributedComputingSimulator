@@ -8,7 +8,7 @@ import simulator.initializationModule as initializationModule
 import simulator.communication as communication
 
 
-def initiateRun(network: initializationModule.Initialization, comm: communication.Communication, sync: bool):
+def initiateRun(network: initializationModule.Initialization, comm: communication.Communication, sync: str):
     """
     Runs the network algorithm on the created network.
 
@@ -19,7 +19,7 @@ def initiateRun(network: initializationModule.Initialization, comm: communicatio
         network (Initialization): The initialized network with connected computers.
         comm (Communication): The communication object handling message passing between computers.
     """
-    if sync:
+    if sync == "Sync":
         sync_run(network, comm)
     else:
         async_run(network, comm)

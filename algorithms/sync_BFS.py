@@ -6,7 +6,7 @@ colors = ["blue", "red", "green", "yellow", "purple", "pink", "orange", "cyan", 
           "brown", "maroon", "navy", "olive", "coral", "salmon", "gold", "silver"]
 
 def mainAlgorithm(self: computer.Computer, communication: Communication, round, messages=None):
-    print(f"Computer {self.id} is running the main algorithm, round {round}")
+    #print(f"Computer {self.id} is running the main algorithm, round {round}")
     if round == 0:
         # Initialize the root node
         if self.is_root:

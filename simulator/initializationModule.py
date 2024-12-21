@@ -46,42 +46,29 @@ class Initialization:
         ##    self.update_network_variables(network_variables)
         ##
 
-
         self.update_network_variables(network_variables)
 
         # use in custom
         self.connected_computers = [Computer() for _ in range(self.computer_number)]
 
-        if network_variables['Sync'] == "Sync":
-            self.message_queue = CustomDict()
-        else:
-            # always
-            self.message_queue = CustomMinHeap()
-
-
-        self.node_values_change = []  # for graph display
-        self.edges_delays = {}  # holds the delays of each edge in the network
 
         # no use in custom
         self.create_computer_ids()
-
-        # always
-        self.network_dict = {}
-        for comp in self.connected_computers:
-            self.network_dict[comp.id] = comp
-
-        # no use in custom
         self.root_selection()
         self.create_connected_computers()
 
         # always
+        self.message_queue = CustomDict() if network_variables['Sync'] == "Sync" else CustomMinHeap()
+        self.node_values_change = []  # for graph display
+        self.edges_delays = {}  # holds the delays of each edge in the network
+        self.network_dict = {comp.id: comp for comp in self.connected_computers}
         self.load_algorithms(self.algorithm_path)
+
+        for comp in self.connected_computers:  # resets the changed flag
+            comp.reset_flag()
 
         # self.delays_creation() # used for creating delays for edges, not used in current version
 
-        # always
-        for comp in self.connected_computers:  # resets the changed flag
-            comp.reset_flag()
 
     def parse_topology_file(self, file_path):
         """
@@ -95,8 +82,6 @@ class Initialization:
         #self.topologyType = 'Custom'
 
         ## read lines in file and parse into network variables
-
-
 
     def update_network_variables(self, network_variables_data):
         """

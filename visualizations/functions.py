@@ -75,6 +75,7 @@ def undo_change(self):
         previous_node_item.update()
               
 def change_node_color(self, times):
+    print("Change node color$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
     """
     Change the color of a node based on the current state in the network.
 
@@ -92,7 +93,9 @@ def change_node_color(self, times):
                     node_name = value
                     break
             self.update_node_color(node_name, values_change_dict)
-            
+            print(f"Node {node_name} changes: {values_change_dict}")
+
+
 def update_node_color(self, node_name, values_change_dict):
     """
     Update the node's color and state based on the provided values.
