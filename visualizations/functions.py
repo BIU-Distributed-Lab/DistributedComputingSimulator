@@ -87,13 +87,9 @@ def change_node_color(self, times):
     for _ in range(times):
         if self.network.node_values_change:
             values_change_dict = self.network.node_values_change.pop(0)
-            node_name = None
-            for key, value in values_change_dict.items():
-                if key == 'id':
-                    node_name = value
-                    break
-            self.update_node_color(node_name, values_change_dict)
-            print(f"Node {node_name} changes: {values_change_dict}")
+            node_name = values_change_dict.get('id')
+            if node_name != None:
+                self.update_node_color(node_name, values_change_dict)
 
 
 def update_node_color(self, node_name, values_change_dict):
@@ -108,10 +104,21 @@ def update_node_color(self, node_name, values_change_dict):
     """
     node_item = self.nodes_map[str(node_name)]
     previous_state = node_item.values.copy()
+    changes = []
     for key, value in values_change_dict.items():
         node_item.values[key] = value
+        if not key.startswith("_") and previous_state.get(key) != value:
+            changes.append(f"'{key}' changed to '{value}'")
+            #print(f"Key '{key}' changed to '{value}'")
+
     node_item.color = node_item.values['color']
     next_state = node_item.values.copy()
     self.change_stack.insert(0, (node_item, previous_state))
     self.change_stack.insert(1, (node_item, next_state))
     node_item.update()
+
+    # Update the label with the changes
+    if changes:
+        self.last_phase_label.setText(f"Last phase changes in node {node_name}: " + ", ".join(changes))
+    else:
+        self.last_phase_label.setText("Last phase: No changes")

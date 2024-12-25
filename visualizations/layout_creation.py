@@ -85,6 +85,12 @@ def layoutCreation(self):
     slider_h_layout.addWidget(self.slider_label)
 
     buttons_layout = QGridLayout()
+
+
+    # Add a label to show what happened in the last phase
+    self.last_phase_label = QLabel("Last phase: None")
+    buttons_layout.addWidget(self.last_phase_label, 0, 0, 1, 2)
+
     self.next_phase_button = QPushButton("Next Phase")
     self.next_phase_button.setFixedSize(300, 40)
     set_button_style(self.next_phase_button, normal_button_style, pressed_button_style)
