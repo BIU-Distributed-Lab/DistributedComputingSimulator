@@ -7,7 +7,7 @@ This module handles the sending and receiving of messages between computers in t
 import random
 from simulator.computer import Computer
 import simulator.initializationModule as initializationModule
-
+from utils.logger_config import logger
 TERMINATED_STATE = "terminated"
 
 
@@ -86,7 +86,7 @@ class Communication:
             comm (Communication): The communication object handling the message passing.
         """
         if self.network.logging_type == "Long":
-            print(message)
+            logger.info(message)
 
         received_id = message['dest_id']
         received_computer = self.network.network_dict.get(received_id)
@@ -113,5 +113,5 @@ class Communication:
                 self.network.node_values_change.append(comp.__dict__.copy())
                 comp.reset_flag()
         else:
-            print(f"Error: Function '{function_name}' not found in {comp.algorithm_file}.py")
+            logger.info(f"Error: Function '{function_name}' not found in {comp.algorithm_file}.py")
             return None

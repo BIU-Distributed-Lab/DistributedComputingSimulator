@@ -75,7 +75,6 @@ def undo_change(self):
         previous_node_item.update()
               
 def change_node_color(self, times):
-    print("Change node color$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
     """
     Change the color of a node based on the current state in the network.
 

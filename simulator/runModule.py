@@ -6,7 +6,7 @@ This module initializes the network, runs the algorithms on each computer, and m
 
 import simulator.initializationModule as initializationModule
 import simulator.communication as communication
-
+from utils.logger_config import logger
 
 def initiateRun(network: initializationModule.Initialization, comm: communication.Communication, sync: str):
     """
@@ -40,7 +40,7 @@ def async_run(network: initializationModule.Initialization, comm: communication.
     for comp in network.connected_computers:
         comm.run_algorithm(comp, 'init')
 
-    print("************************************************************************************")
+    logger.info("************************************************************************************")
 
     ## runs mainAlgorithm
     while not network.message_queue.empty():

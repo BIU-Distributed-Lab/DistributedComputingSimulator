@@ -10,7 +10,7 @@ import os
 import random
 import sys
 import math
-
+from utils.logger_config import logger
 from simulator.computer import Computer
 from simulator.data_structures.union_find import UnionFind
 from simulator.data_structures.custom_min_heap import CustomMinHeap
@@ -357,7 +357,7 @@ class Initialization:
             algorithm_module_path (str): The file path to the algorithm module.
         """
         if algorithm_module_path == 'no_alg_provided':
-            print("No algorithm was provided")
+            logger.error("No algorithm was provided")
             exit()
 
         try:
@@ -370,7 +370,7 @@ class Initialization:
                 comp.algorithm_file = algorithm_module
 
         except ImportError:
-            print(f"Error: Unable to import {base_file_name}.py")
+            logger.error(f"Error: Unable to import {base_file_name}.py")
             return None
 
     def root_selection(self):

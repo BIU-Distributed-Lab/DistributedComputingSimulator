@@ -1,6 +1,7 @@
 import simulator.computer as computer
 from simulator.communication import Communication
 import numpy as np
+from utils.logger_config import logger
 
 ''' 
 user implemented code that runs a BFS algorithm
@@ -29,7 +30,7 @@ def mainAlgorithm(self: computer.Computer, communication: Communication, _arriva
 
 def init(self: computer.Computer, communication: Communication):
     if self.is_root:
-        print(f"{self.id} is the root")
+        logger.info(f"{self.id} is the root")
         self.parent = self.id
         self.distance = 0
         communication.send_to_all(self.id, f"running a BFS with distance {self.distance} from {self.parent}")

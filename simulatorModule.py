@@ -3,10 +3,10 @@ import threading
 import sys
 import time
 import json
-
+from utils.logger_config import logger
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-
+from utils.logger_config import logger
 import simulator.runModule as runModule
 import simulator.communication as communication
 import simulator.initializationModule as initializationModule
@@ -46,7 +46,7 @@ def initializeSimulator():
 
     network = initializationModule.Initialization(network_variables)
     if network.logging_type != "Short":
-        print(network)
+        logger.info(network)
 
     comm = communication.Communication(network)
     return network, comm, network_variables
@@ -74,21 +74,23 @@ def runSimulator(network: initializationModule.Initialization, comm: communicati
         thread = threading.Thread(target=runModule.initiateRun, args=(network, comm, network_variables['Sync']))
         thread.start()
         thread.join()
-        print("--- total simulation time : %s seconds ---" % (time.time() - start_time))
+        logger.info("--- total simulation time : %s seconds ---" % (time.time() - start_time))
         sys.exit(app.exec_())
     else:
         runModule.initiateRun(network, comm, network_variables['Sync'])
         algorithm_run_time = time.time() - start_time - net_creation_time
-        print("--- Total Simulation Time : %s seconds ---" % (time.time() - start_time))
-        print("--- Net Creation Time : %s seconds ---" % (net_creation_time))
-        print("--- Algorithm Run Time : %s seconds ---" % (algorithm_run_time))
+        logger.info("--- Total Simulation Time : %s seconds ---" % (time.time() - start_time))
+        logger.info("--- Net Creation Time : %s seconds ---" % (net_creation_time))
+        logger.info("--- Algorithm Run Time : %s seconds ---" % (algorithm_run_time))
 
 
 if __name__ == "__main__":
     """
     Main entry point for the simulator. Redirects standard output to a log file and runs the simulator.
     """
-    sys.stdout = open(OUTPUT_FILE, "w")
+    #sys.stdout = open(OUTPUT_FILE, "w")
+    logger.info("Starting the simulator")
+    logger.debug("check if print to console")
     start_time = time.time()
     network, comm, network_variables = initializeSimulator()
 

@@ -10,7 +10,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import sys
 import os
-
+from utils.logger_config import logger
 # Constants 
 NETWORK_VARIABLES = 'network_variables.json'
 CHECKBOX_LAYOUT_GEOMETRY = (800, 90, 500, 800)
@@ -242,8 +242,9 @@ class MenuWindow(QMainWindow):
     def on_upload_algorithm(self):
         """
         Handle the upload of a Python algorithm file.
-        """        
-        fname, _ = QFileDialog.getOpenFileName(self, 'Upload Python File', '/home', "Python Files (*.py)")
+        """
+        initial_dir = os.getcwd()  # Get the current working directory
+        fname, _ = QFileDialog.getOpenFileName(self, 'Upload Python File', initial_dir, "Python Files (*.py)")
         if fname:
             _, file_extension = os.path.splitext(fname)
             if file_extension.lower() == '.py':
@@ -260,7 +261,7 @@ class MenuWindow(QMainWindow):
         if fname:
             _, file_extension = os.path.splitext(fname)
             if file_extension.lower() == '.txt':
-                print("file name", fname)
+                logger.info("file name", fname)
                 self.checkbox_values["Topology File"] = fname
                 self.update_value("Topology File", fname)
                 self.handle_custom_topology()

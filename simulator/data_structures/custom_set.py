@@ -75,5 +75,4 @@ class CustomSet:
         Returns:
             list: A list of all messages in the set as dictionaries.
         """
-        print([dict(msg) for msg in self.set])
         return [dict(msg) for msg in self.set]

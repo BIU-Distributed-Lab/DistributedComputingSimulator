@@ -3,6 +3,7 @@ Computer module representing a node in the distributed network simulation.
 
 This module defines the `Computer` class, which is used to represent a computer node in the network, including its connections, delays, and other properties.
 """
+from utils.logger_config import logger
 
 class Computer:
     """
@@ -52,7 +53,7 @@ class Computer:
         if not name.startswith('_') and getattr(self, name, None) != value:
             self._has_changed = True
             # print the id and what is changing
-            print(f"Computer {self.id} is changing {name} to {value}")
+            logger.debug(f"Computer {self.id} is changing {name} to {value}")
         super().__setattr__(name, value)
 
     def reset_flag(self):
