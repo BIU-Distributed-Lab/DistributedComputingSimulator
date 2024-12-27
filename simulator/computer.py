@@ -19,13 +19,13 @@ class Computer:
         _has_changed (bool): A private flag indicating whether the computer's state has changed.
     """
     
-    def __init__(self,  ):     
+    def __init__(self, new_id=None):
         """
         Initializes a Computer object with default values for attributes.
         """
         self._has_changed = False
                 
-        self.id = None
+        self.id = new_id
         self.connectedEdges = []
         self.algorithm_file=None
         self.state = None
@@ -53,7 +53,7 @@ class Computer:
         if not name.startswith('_') and getattr(self, name, None) != value:
             self._has_changed = True
             # print the id and what is changing
-            logger.debug(f"Computer {self.id} is changing {name} to {value}")
+            #logger.debug(f"Computer {self.id} is changing {name} to {value}")
         super().__setattr__(name, value)
 
     def reset_flag(self):

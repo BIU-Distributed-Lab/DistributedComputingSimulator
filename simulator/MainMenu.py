@@ -261,7 +261,7 @@ class MenuWindow(QMainWindow):
         if fname:
             _, file_extension = os.path.splitext(fname)
             if file_extension.lower() == '.txt':
-                logger.info("file name", fname)
+                logger.info(f"file name is {fname}")
                 self.checkbox_values["Topology File"] = fname
                 self.update_value("Topology File", fname)
                 self.handle_custom_topology()
@@ -276,15 +276,14 @@ class MenuWindow(QMainWindow):
         """
         Handle the deletion of the uploaded topology file.
         """
-        if self.checkbox_values["Topology File"]:
-            self.checkbox_values["Topology File"] = ""
-            self.update_value("Topology File", "")
-            self.combo_boxes["Topology"].setCurrentText("")
-            self.combo_boxes["Topology"].setEnabled(True)
-            self.combo_boxes["Root"].setCurrentText("")
-            self.combo_boxes["Root"].setEnabled(True)
-            self.combo_boxes["ID Type"].setCurrentText("")
-            self.combo_boxes["ID Type"].setEnabled(True)
+        self.checkbox_values["Topology File"] = ""
+        self.update_value("Topology File", "")
+        self.combo_boxes["Topology"].setCurrentText("Random")
+        self.combo_boxes["Topology"].setEnabled(True)
+        self.combo_boxes["Root"].setCurrentText("Random")
+        self.combo_boxes["Root"].setEnabled(True)
+        self.combo_boxes["ID Type"].setCurrentText("Random")
+        self.combo_boxes["ID Type"].setEnabled(True)
 
     def handle_custom_topology(self):
         self.combo_boxes["Topology"].setCurrentText("Custom")
@@ -298,8 +297,16 @@ class MenuWindow(QMainWindow):
         """
         Handle the final submission of all settings and save them to a JSON file.
         """
+        logger.debug(f"Checkbox values are: {self.checkbox_values}")
         if any([value == "" for key, value in self.checkbox_values.items() if key != "Topology File"]):
             QMessageBox.warning(self, 'Error', 'Please fill in all the fields before submitting.', QMessageBox.Ok)
+            return
+        if self.checkbox_values["Topology File"] == '' and (
+                self.checkbox_values["Topology"] == "Custom" or
+                self.checkbox_values["Root"] == "Custom" or
+                self.checkbox_values["ID Type"] == "Custom"
+        ):
+            QMessageBox.warning(self, 'Error', 'Please upload a topology file when any custom option is selected.', QMessageBox.Ok)
             return
         with open(NETWORK_VARIABLES, "w") as f:
             json.dump(self.checkbox_values, f, indent=4)

@@ -38,30 +38,21 @@ class Initialization:
         Args:
             network_variables (dict): The network configuration dictionary.
         """
-        ## if network_variables.topology_file
-        ##      self.parse_topology_file(file_path)
-        ##      self.build toplogy
-        ##      self.root_selection()
-        ## else:
-        ##    self.update_network_variables(network_variables)
-        ##
+        if network_variables['Topology File'] != '':
+            self.parse_topology_file(network_variables['Topology File'], network_variables)
+        else:
+            self.update_network_variables(network_variables)
+            self.connected_computers = [Computer() for _ in range(self.computer_number)]
+            self.create_computer_ids()
+            self.root_selection()
+            self.create_connected_computers()
+            self.network_dict = {comp.id: comp for comp in self.connected_computers}
 
-        self.update_network_variables(network_variables)
-
-        # use in custom
-        self.connected_computers = [Computer() for _ in range(self.computer_number)]
-
-
-        # no use in custom
-        self.create_computer_ids()
-        self.root_selection()
-        self.create_connected_computers()
 
         # always
         self.message_queue = CustomDict() if network_variables['Sync'] == "Sync" else CustomMinHeap()
         self.node_values_change = []  # for graph display
         self.edges_delays = {}  # holds the delays of each edge in the network
-        self.network_dict = {comp.id: comp for comp in self.connected_computers}
         self.load_algorithms(self.algorithm_path)
 
         for comp in self.connected_computers:  # resets the changed flag
@@ -70,7 +61,7 @@ class Initialization:
         # self.delays_creation() # used for creating delays for edges, not used in current version
 
 
-    def parse_topology_file(self, file_path):
+    def parse_topology_file(self, file_path, network_variables):
         """
         Parses a topology file to create the network topology.
 
@@ -79,9 +70,64 @@ class Initialization:
         """
         with open(file_path, 'r') as f:
             lines = f.readlines()
-        #self.topologyType = 'Custom'
+            logger.debug(f"Reading topology file {file_path}")
+            logger.debug(f"File contents: {lines}")
 
-        ## read lines in file and parse into network variables
+        section = None
+        ids_list = []
+        edges_list = []
+        num_computers = 0
+        root_id = None
+
+        for line in lines:
+            line = line.strip()
+            if line.endswith(':'):
+                section = line[:-1].lower().replace(' ', '_')
+            elif section == "ids_list":
+                ids_list.extend(map(int, line.split(',')))
+            elif section == "number_of_computers":
+                num_computers = int(line)
+            elif section == "root_id":
+                root_id = line if line.lower() == "random" else int(line)
+            elif section == "edges":
+                edges = line.replace('(', '').replace(')', '').split(',')
+                edges_list.extend((int(edges[i]), int(edges[i + 1])) for i in range(0, len(edges), 2))
+
+
+        logger.info(f"Topology file {file_path} parsed successfully.")
+        logger.debug(f"IDs: {ids_list}")
+        logger.debug(f"Number of computers: {num_computers}")
+        logger.debug(f"Root ID: {root_id}")
+        logger.debug(f"Edges: {edges_list}")
+
+
+        self.computer_number = num_computers
+        self.connected_computers = [Computer(new_id=new_id) for new_id in ids_list]
+        self.network_dict = {comp.id: comp for comp in self.connected_computers}
+
+        if root_id == "random":
+            selected_computer = random.choice(self.connected_computers)
+            selected_computer.is_root = True
+        else:
+            self.network_dict[root_id].is_root = True
+
+        for u, v in edges_list:
+            self.network_dict[u].connectedEdges.append(v)
+            self.network_dict[v].connectedEdges.append(u)
+
+        self.topologyType = 'Custom'
+        self.id_type = 'Custom'
+        self.display_type = network_variables.get('Display', 'Text')
+        self.root_type = root_id
+        self.delay_type = network_variables.get('Delay', 'Random')
+        self.algorithm_path = network_variables.get('Algorithm', 'no_alg_provided')
+        self.logging_type = network_variables.get('Logging', 'Short')
+
+        # check if graph is connected if not return to main menu
+        connected = self.is_connected()
+        if not connected:
+            logger.error("The network is not connected. Please provide a connected network.")
+            exit()
 
     def update_network_variables(self, network_variables_data):
         """
