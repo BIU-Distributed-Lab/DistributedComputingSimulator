@@ -62,7 +62,8 @@ class MenuWindow(QMainWindow):
         self.setGeometry(0, 0, 1500, 900)
         self.setWindowTitle("Simulator for Distributed Networks")
         self.init_ui()
-        
+        self.closeByExitButton = True
+
     def init_ui(self):
         """
         Initialize the UI components, including labels, buttons, and input options.
@@ -310,15 +311,16 @@ class MenuWindow(QMainWindow):
             return
         with open(NETWORK_VARIABLES, "w") as f:
             json.dump(self.checkbox_values, f, indent=4)
+        self.closeByExitButton = False
         self.close()
 
-
-def menu(network_variables: dict):
+def menu(network_variables: dict, show_error: bool):
     """
     Launch the menu application for configuring network variables.
 
     Args:
         network_variables (dict): A dictionary of default or previously saved network variables.
+        show_error (bool): Flag to indicate if a network error message should be shown.
     """
     app = QApplication(sys.argv)
     menu_window = MenuWindow(network_variables)
@@ -326,6 +328,10 @@ def menu(network_variables: dict):
     stylesheet_file = os.path.join('./designFiles', 'main_window.qss')
     with open(stylesheet_file, 'r') as f:
         menu_window.setStyleSheet(f.read())
-    
+
+    if show_error:
+        QMessageBox.warning(menu_window, 'Error', 'Network not connected. Please check your connection.', QMessageBox.Ok)
+
     menu_window.show()
     app.exec_()
+    return menu_window.closeByExitButton

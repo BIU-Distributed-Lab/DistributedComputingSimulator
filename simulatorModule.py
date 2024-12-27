@@ -3,6 +3,8 @@ import threading
 import sys
 import time
 import json
+
+from utils.exceptions import NetworkNotConnectedError
 from utils.logger_config import logger
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -37,19 +39,36 @@ def load_network_variables():
 def initializeSimulator():
     """
     Initializes the simulator by creating the network, communication instances, and loading network variables.
-    
+
     Returns:
         tuple: A tuple containing the initialized network, communication instance, and the loaded network variables.
     """
-    network_variables = load_network_variables()
-    MainMenu.menu(network_variables)
+    show_error = False
+    while True:
+        try:
+            logger.debug("Loading network variables")
+            network_variables = load_network_variables()
+            exitButtonPressed = MainMenu.menu(network_variables, show_error)
 
-    network = initializationModule.Initialization(network_variables)
-    if network.logging_type != "Short":
-        logger.info(network)
+            if exitButtonPressed:
+                sys.exit()
 
-    comm = communication.Communication(network)
-    return network, comm, network_variables
+            network = initializationModule.Initialization(network_variables)
+            if network.logging_type != "Short":
+                logger.info(network)
+
+            comm = communication.Communication(network)
+            logger.debug("Network and Communication objects created")
+            return network, comm, network_variables
+
+        except NetworkNotConnectedError as e:
+            logger.error(e)
+            show_error = True
+            continue
+        except Exception as e:
+            logger.error("An error occurred during network initialization: %s" % e)
+            break
+
 
 
 def runSimulator(network: initializationModule.Initialization, comm: communication.Communication,
@@ -93,6 +112,6 @@ if __name__ == "__main__":
     logger.debug("check if print to console")
     start_time = time.time()
     network, comm, network_variables = initializeSimulator()
-
+    logger.debug("Network and Communication objects created")
     runSimulator(network, comm, network_variables, start_time)
 #sdfsdfs

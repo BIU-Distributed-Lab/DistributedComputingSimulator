@@ -16,7 +16,7 @@ from simulator.data_structures.union_find import UnionFind
 from simulator.data_structures.custom_min_heap import CustomMinHeap
 from simulator.data_structures.custom_set import CustomSet
 from simulator.data_structures.custom_dict import CustomDict
-
+from utils.exceptions import *
 
 class Initialization:
     """
@@ -126,8 +126,7 @@ class Initialization:
         # check if graph is connected if not return to main menu
         connected = self.is_connected()
         if not connected:
-            logger.error("The network is not connected. Please provide a connected network.")
-            exit()
+            raise NetworkNotConnectedError()
 
     def update_network_variables(self, network_variables_data):
         """
