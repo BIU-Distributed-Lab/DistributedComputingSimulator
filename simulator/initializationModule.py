@@ -68,65 +68,84 @@ class Initialization:
         Args:
             file_path (str): The file path to the topology file.
         """
-        with open(file_path, 'r') as f:
-            lines = f.readlines()
-            logger.debug(f"Reading topology file {file_path}")
-            logger.debug(f"File contents: {lines}")
+        try:
+            with open(file_path, 'r') as f:
+                lines = f.readlines()
+                logger.debug(f"Reading topology file {file_path}")
+                logger.debug(f"File contents: {lines}")
 
-        section = None
-        ids_list = []
-        edges_list = []
-        num_computers = 0
-        root_id = None
+            section = None
+            ids_set = set()
+            edges_set = set()
+            num_computers = 0
+            root_id = None
 
-        for line in lines:
-            line = line.strip()
-            if line.endswith(':'):
-                section = line[:-1].lower().replace(' ', '_')
-            elif section == "ids_list":
-                ids_list.extend(map(int, line.split(',')))
-            elif section == "number_of_computers":
-                num_computers = int(line)
-            elif section == "root_id":
-                root_id = line if line.lower() == "random" else int(line)
-            elif section == "edges":
-                edges = line.replace('(', '').replace(')', '').split(',')
-                edges_list.extend((int(edges[i]), int(edges[i + 1])) for i in range(0, len(edges), 2))
+            for line in lines:
+                line = line.strip()
+                if line.endswith(':'):
+                    section = line[:-1].lower().replace(' ', '_')
+                elif section == "ids_list":
+                    for new_id in map(int, line.split(',')):
+                        ids_set.add(new_id)  # Add to set; duplicates are ignored
+                elif section == "number_of_computers":
+                    num_computers = int(line)
+                elif section == "root_id":
+                    root_id = line if line.lower() == "random" else int(line)
+                elif section == "edges":
+                    edges = line.replace('(', '').replace(')', '').split(',')
+                    for i in range(0, len(edges), 2):
+                        u, v = int(edges[i]), int(edges[i + 1])
+                        # Validate that both IDs exist in ids_set
+                        if u not in ids_set or v not in ids_set:
+                            raise ParseTopologyFileError(f"Edge ({u}, {v}) contains ID(s) not in ids_list")
+                        # Add edge to edges_set in a consistent order to avoid duplicates
+                        edges_set.add((min(u, v), max(u, v)))
+
+            logger.info(f"Topology file {file_path} parsed successfully.")
+            logger.debug(f"IDs: {ids_set}")
+            logger.debug(f"Number of computers: {num_computers}")
+            logger.debug(f"Root ID: {root_id}")
+            logger.debug(f"Edges: {edges_set}")
+
+            # if ids set size is not equal to number of computers, raise an error
+            if len(ids_set) != num_computers:
+                raise ParseTopologyFileError("The number of computers does not match the number of IDs provided.")
 
 
-        logger.info(f"Topology file {file_path} parsed successfully.")
-        logger.debug(f"IDs: {ids_list}")
-        logger.debug(f"Number of computers: {num_computers}")
-        logger.debug(f"Root ID: {root_id}")
-        logger.debug(f"Edges: {edges_list}")
+            self.computer_number = num_computers
+            self.connected_computers = [Computer(new_id=new_id) for new_id in ids_set]
+            self.network_dict = {comp.id: comp for comp in self.connected_computers}
 
+            if root_id == "random":
+                selected_computer = random.choice(self.connected_computers)
+                selected_computer.is_root = True
+            else:
+                if root_id not in ids_set:
+                    raise ParseTopologyFileError(f"Root ID {root_id} not found in the IDs list")
+                self.network_dict[root_id].is_root = True
 
-        self.computer_number = num_computers
-        self.connected_computers = [Computer(new_id=new_id) for new_id in ids_list]
-        self.network_dict = {comp.id: comp for comp in self.connected_computers}
+            for u, v in edges_set:
+                self.network_dict[u].connectedEdges.append(v)
+                self.network_dict[v].connectedEdges.append(u)
 
-        if root_id == "random":
-            selected_computer = random.choice(self.connected_computers)
-            selected_computer.is_root = True
-        else:
-            self.network_dict[root_id].is_root = True
+            self.topologyType = 'Custom'
+            self.id_type = 'Custom'
+            self.display_type = network_variables.get('Display', 'Text')
+            self.root_type = root_id
+            self.delay_type = network_variables.get('Delay', 'Random')
+            self.algorithm_path = network_variables.get('Algorithm', 'no_alg_provided')
+            self.logging_type = network_variables.get('Logging', 'Short')
 
-        for u, v in edges_list:
-            self.network_dict[u].connectedEdges.append(v)
-            self.network_dict[v].connectedEdges.append(u)
+            # check if graph is connected if not return to main menu
+            connected = self.is_connected()
+            if not connected:
+                raise ParseTopologyFileError("The network is not connected. Please connect the network and try again.")
+        except ParseTopologyFileError as e:
+            logger.error(e)
+            raise e
+        except Exception as e:
+            raise ParseTopologyFileError(f"Error parsing topology file, please check the file format and try again")
 
-        self.topologyType = 'Custom'
-        self.id_type = 'Custom'
-        self.display_type = network_variables.get('Display', 'Text')
-        self.root_type = root_id
-        self.delay_type = network_variables.get('Delay', 'Random')
-        self.algorithm_path = network_variables.get('Algorithm', 'no_alg_provided')
-        self.logging_type = network_variables.get('Logging', 'Short')
-
-        # check if graph is connected if not return to main menu
-        connected = self.is_connected()
-        if not connected:
-            raise NetworkNotConnectedError()
 
     def update_network_variables(self, network_variables_data):
         """

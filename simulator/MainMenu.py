@@ -11,7 +11,8 @@ from PyQt5.QtWidgets import *
 import sys
 import os
 from utils.logger_config import logger
-# Constants 
+
+# Constants
 NETWORK_VARIABLES = 'network_variables.json'
 CHECKBOX_LAYOUT_GEOMETRY = (800, 90, 500, 800)
 COMBOBOX_OPTIONS = {
@@ -58,7 +59,7 @@ class MenuWindow(QMainWindow):
         super().__init__()
         ##self.network_variables_file = network_variables_file
         self.combo_boxes = {}
-        self.checkbox_values = network_variables_data # Dictionary to store checkbox values with default values
+        self.checkbox_values = network_variables_data  # Dictionary to store checkbox values with default values
         self.setGeometry(0, 0, 1500, 900)
         self.setWindowTitle("Simulator for Distributed Networks")
         self.init_ui()
@@ -68,7 +69,7 @@ class MenuWindow(QMainWindow):
         """
         Initialize the UI components, including labels, buttons, and input options.
         """
-        self.label_values = {}  
+        self.label_values = {}
         self.create_labels()
         self.create_buttons()
         self.create_options()
@@ -91,7 +92,6 @@ class MenuWindow(QMainWindow):
         if key in self.label_values:
             self.label_values[key].setText(f"{key}: <span style='color: blue;'>{value}</span>")
             self.label_values[key].setWordWrap(True)
-
 
     def create_labels(self):
         """
@@ -122,7 +122,7 @@ class MenuWindow(QMainWindow):
         info_label.resize(650, 50)
         info_label.setStyleSheet("color: blue;")  # Set the color of the info label to blue
 
-    def get_button_color(self,button):
+    def get_button_color(self, button):
         palette = button.palette()
         color = palette.color(QPalette.Button)
         return color.name()  # Returns the color in hex format, e.g., "#f0f0f0"
@@ -143,19 +143,16 @@ class MenuWindow(QMainWindow):
         trash_button.setGeometry(260, 250, 30, 30)
         trash_button.clicked.connect(lambda: self.on_delete_topology_file())
 
-
-        self.submit_button = QPushButton("Submit", self) 
+        self.submit_button = QPushButton("Submit", self)
         self.submit_button.setGeometry(550, 900, 150, 30)
         self.submit_button.clicked.connect(lambda: self.on_submit_all())
-
-
 
     def create_options(self):
         """
         Create options using combo boxes and number input for configuring network variables.
         """
         checkbox_layout = QVBoxLayout()
-        
+
         self.add_number_input(checkbox_layout)  # adding the number of computers option
 
         for key, options in COMBOBOX_OPTIONS.items():
@@ -165,7 +162,6 @@ class MenuWindow(QMainWindow):
         checkbox_widget = QWidget(self)
         checkbox_widget.setLayout(checkbox_layout)
         checkbox_widget.setGeometry(*CHECKBOX_LAYOUT_GEOMETRY)
-
 
     def add_number_input(self, layout):
         """
@@ -200,22 +196,21 @@ class MenuWindow(QMainWindow):
             self.validate_display_type()
         else:
             self.submit_button.setEnabled(False)
-    
+
     def validate_display_type(self):
         """
         Validate the display type based on the number of computers selected.
         """
         number_of_computers = int(self.checkbox_values.get("Number of Computers", 0))
         display_type = self.checkbox_values.get("Display", "")
-        
+
         if number_of_computers > 500 and display_type != "Text":
-            QMessageBox.warning(self, 'Error', 'The number of computers cannot exceed 500 unless the display is set to Text. You will be able to submit only if you choose Text output!', QMessageBox.Ok)
+            QMessageBox.warning(self, 'Error',
+                                'The number of computers cannot exceed 500 unless the display is set to Text. You will be able to submit only if you choose Text output!',
+                                QMessageBox.Ok)
             self.submit_button.setEnabled(False)
         else:
             self.submit_button.setEnabled(True)
-
-
-
 
     def add_combo_box(self, layout, label_text, options):
         """
@@ -270,9 +265,6 @@ class MenuWindow(QMainWindow):
             else:
                 QMessageBox.warning(self, 'Error', 'Please select a text file (.txt)', QMessageBox.Ok)
 
-
-
-
     def on_delete_topology_file(self):
         """
         Handle the deletion of the uploaded topology file.
@@ -307,14 +299,16 @@ class MenuWindow(QMainWindow):
                 self.checkbox_values["Root"] == "Custom" or
                 self.checkbox_values["ID Type"] == "Custom"
         ):
-            QMessageBox.warning(self, 'Error', 'Please upload a topology file when any custom option is selected.', QMessageBox.Ok)
+            QMessageBox.warning(self, 'Error', 'Please upload a topology file when any custom option is selected.',
+                                QMessageBox.Ok)
             return
         with open(NETWORK_VARIABLES, "w") as f:
             json.dump(self.checkbox_values, f, indent=4)
         self.closeByExitButton = False
         self.close()
 
-def menu(network_variables: dict, show_error: bool):
+
+def menu(network_variables: dict, show_error: str):
     """
     Launch the menu application for configuring network variables.
 
@@ -330,7 +324,7 @@ def menu(network_variables: dict, show_error: bool):
         menu_window.setStyleSheet(f.read())
 
     if show_error:
-        QMessageBox.warning(menu_window, 'Error', 'Network not connected. Please check your connection.', QMessageBox.Ok)
+        QMessageBox.warning(menu_window, 'Error', show_error, QMessageBox.Ok)
 
     menu_window.show()
     app.exec_()

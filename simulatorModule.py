@@ -4,7 +4,7 @@ import sys
 import time
 import json
 
-from utils.exceptions import NetworkNotConnectedError
+from utils.exceptions import *
 from utils.logger_config import logger
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -43,7 +43,7 @@ def initializeSimulator():
     Returns:
         tuple: A tuple containing the initialized network, communication instance, and the loaded network variables.
     """
-    show_error = False
+    show_error = None
     while True:
         try:
             logger.debug("Loading network variables")
@@ -61,9 +61,9 @@ def initializeSimulator():
             logger.debug("Network and Communication objects created")
             return network, comm, network_variables
 
-        except NetworkNotConnectedError as e:
+        except ParseTopologyFileError as e:
             logger.error(e)
-            show_error = True
+            show_error = e.message
             continue
         except Exception as e:
             logger.error("An error occurred during network initialization: %s" % e)
@@ -112,6 +112,5 @@ if __name__ == "__main__":
     logger.debug("check if print to console")
     start_time = time.time()
     network, comm, network_variables = initializeSimulator()
-    logger.debug("Network and Communication objects created")
     runSimulator(network, comm, network_variables, start_time)
 #sdfsdfs
