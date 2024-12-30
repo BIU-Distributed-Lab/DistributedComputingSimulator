@@ -116,7 +116,7 @@ class Initialization:
             self.connected_computers = [Computer(new_id=new_id) for new_id in ids_set]
             self.network_dict = {comp.id: comp for comp in self.connected_computers}
 
-            if root_id == "random":
+            if root_id.lower() == "random":
                 selected_computer = random.choice(self.connected_computers)
                 selected_computer.is_root = True
             else:
