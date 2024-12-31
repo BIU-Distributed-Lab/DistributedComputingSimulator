@@ -29,3 +29,5 @@ file_handler.setFormatter(formatter)
 # Add the handlers to the logger
 logger.addHandler(console_handler)
 logger.addHandler(file_handler)
+
+# DEBUG INFO WARNIGN ERROR

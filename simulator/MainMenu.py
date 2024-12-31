@@ -14,7 +14,7 @@ from utils.logger_config import logger
 
 # Constants
 NETWORK_VARIABLES = 'network_variables.json'
-CHECKBOX_LAYOUT_GEOMETRY = (800, 90, 500, 800)
+CHECKBOX_LAYOUT_GEOMETRY = (1000, 90, 500, 800)
 COMBOBOX_OPTIONS = {
     "Sync": "Sync, Async",
     "Topology": "Random, Clique, Line, Tree, Star, Custom",
@@ -60,7 +60,7 @@ class MenuWindow(QMainWindow):
         ##self.network_variables_file = network_variables_file
         self.combo_boxes = {}
         self.checkbox_values = network_variables_data  # Dictionary to store checkbox values with default values
-        self.setGeometry(0, 0, 1500, 900)
+        self.setGeometry(0, 0, 1920, 1280)
         self.setWindowTitle("Simulator for Distributed Networks")
         self.init_ui()
         self.closeByExitButton = True
