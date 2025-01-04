@@ -60,7 +60,7 @@ class MenuWindow(QMainWindow):
         ##self.network_variables_file = network_variables_file
         self.combo_boxes = {}
         self.checkbox_values = network_variables_data  # Dictionary to store checkbox values with default values
-        self.setGeometry(0, 0, 1920, 1280)
+        self.setGeometry(0, 0, 1600, 1280)
         self.setWindowTitle("Simulator for Distributed Networks")
         self.init_ui()
         self.closeByExitButton = True
@@ -234,6 +234,11 @@ class MenuWindow(QMainWindow):
         self.combo_boxes[label_text] = combo_box
 
         combo_box.currentTextChanged.connect(lambda value: self.update_value(label_text, value))
+
+        # Disable the combo box if the network variable is set to "Custom"
+        if self.checkbox_values.get(label_text) == "Custom":
+            combo_box.setEnabled(False)
+            self.combo_boxes[label_text].setCurrentText("Custom")
 
     def on_upload_algorithm(self):
         """
