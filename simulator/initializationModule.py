@@ -80,6 +80,7 @@ class Initialization:
             num_computers = 0
             root_id = None
 
+
             for line in lines:
                 line = line.strip()
                 if line.endswith(':'):
@@ -89,8 +90,21 @@ class Initialization:
                         ids_set.add(new_id)  # Add to set; duplicates are ignored
                 elif section == "number_of_computers":
                     num_computers = int(line)
+
                 elif section == "root_id":
-                    root_id = line if line.lower() == "random" else int(line)
+                    root_values = line.split(',')
+                    if len(root_values) > 1:
+                        raise ParseTopologyFileError(f"Multiple roots detected: {root_values}")
+                    root_value = root_values[0].strip()  # Get the single root value
+                    if root_value.lower() == "random":
+                        root_id = "random"
+                    else:
+                        try:
+                            root_id = int(root_value)  # Try to convert it to an integer
+                        except ValueError:
+                            raise ParseTopologyFileError(
+                                f"Invalid root ID: {root_value}. Must be 'random' or an integer.")
+
                 elif section == "edges":
                     edges = line.replace('(', '').replace(')', '').split(',')
                     for i in range(0, len(edges), 2):
@@ -107,10 +121,8 @@ class Initialization:
             logger.debug(f"Root ID: {root_id}")
             logger.debug(f"Edges: {edges_set}")
 
-            # if ids set size is not equal to number of computers, raise an error
             if len(ids_set) != num_computers:
                 raise ParseTopologyFileError("The number of computers does not match the number of IDs provided.")
-
 
             self.computer_number = num_computers
             self.connected_computers = [Computer(new_id=new_id) for new_id in ids_set]
@@ -119,10 +131,6 @@ class Initialization:
             if root_id.lower() == "random":
                 selected_computer = random.choice(self.connected_computers)
                 selected_computer.is_root = True
-            else:
-                if root_id not in ids_set:
-                    raise ParseTopologyFileError(f"Root ID {root_id} not found in the IDs list")
-                self.network_dict[root_id].is_root = True
 
             for u, v in edges_set:
                 self.network_dict[u].connectedEdges.append(v)
