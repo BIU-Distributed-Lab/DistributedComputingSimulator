@@ -67,3 +67,5 @@ def sync_run(network: initializationModule.Initialization, comm: communication.C
             comm.run_algorithm(comp, 'mainAlgorithm', current_round, current_messages)
 
         current_round += 1
+
+    logger.info("sync run completed")

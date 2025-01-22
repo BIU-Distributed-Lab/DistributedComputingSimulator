@@ -79,7 +79,8 @@ class Initialization:
             edges_set = set()
             num_computers = 0
             root_id = None
-
+            input_names = []
+            ids_inputs = []
 
             for line in lines:
                 line = line.strip()
@@ -115,11 +116,24 @@ class Initialization:
                         # Add edge to edges_set in a consistent order to avoid duplicates
                         edges_set.add((min(u, v), max(u, v)))
 
+                # Input:
+                # [height,weight]
+                # 1:[11,11],2:[22,22],3:[33,33],4:[44,44],5:[55,55]
+                elif section == "input":
+                    if line.startswith('[') and line.endswith(']'):
+                        input_names = line[1:-1].split(',')
+                        logger.debug(f"Attribute names: {input_names}")
+                    else:
+                        ids_inputs = line.split('],')
+                        logger.debug(f"ID attributes: {ids_inputs}")
+
+
             logger.info(f"Topology file {file_path} parsed successfully.")
             logger.debug(f"IDs: {ids_set}")
             logger.debug(f"Number of computers: {num_computers}")
             logger.debug(f"Root ID: {root_id}")
             logger.debug(f"Edges: {edges_set}")
+            logger.debug(f"Attributes: {input_names}")
 
             if len(ids_set) != num_computers:
                 raise ParseTopologyFileError("The number of computers does not match the number of IDs provided.")
@@ -135,6 +149,21 @@ class Initialization:
             for u, v in edges_set:
                 self.network_dict[u].connectedEdges.append(v)
                 self.network_dict[v].connectedEdges.append(u)
+
+            for id_input in ids_inputs:
+                id_str, attr_str = id_input.split(':')
+                logger.debug(f"ID: {id_str}, Inputs: {attr_str}")
+                id = int(id_str)
+                if id not in ids_set:
+                    raise ParseTopologyFileError(f"ID {id} not found in ids_list when parsing input")
+                attr_str = attr_str.strip('[]').split(',')
+                logger.debug(f"Inputs for ID {id}: {attr_str}")
+                if len(attr_str) != len(input_names):
+                    raise ParseTopologyFileError(f"Number of Inputs does not match the number of Input names on ID {id}")
+                for name, value in zip(input_names, attr_str):
+                    setattr(self.network_dict[id], name.strip(), value)
+
+
 
             self.topologyType = 'Custom'
             self.id_type = 'Custom'
@@ -152,6 +181,7 @@ class Initialization:
             logger.error(e)
             raise e
         except Exception as e:
+            logger.debug(f"Error parsing topology file: {e}")
             raise ParseTopologyFileError(f"Error parsing topology file, please check the file format and try again")
 
 
