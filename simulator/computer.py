@@ -32,6 +32,9 @@ class Computer:
         self.is_root = False
         self.color = "olivedrab"
 
+        self.inputs = {}
+        self.outputs = {}
+
     def __str__(self):
         """
         Provides a string representation of the computer's ID, connections, and delays.

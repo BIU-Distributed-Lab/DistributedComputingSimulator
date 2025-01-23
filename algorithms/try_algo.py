@@ -9,5 +9,7 @@ def mainAlgorithm(self: computer.Computer, communication: Communication, round, 
     #print(f"Computer {self.id} is running the main algorithm, round {round}")
     if round == 0:
         # Initialize the root node
-        print(f"id = {self.id}, self.height = {self.height}, self.weight = {self.weight}")
+        print(f"id = {self.id}, self.inputs = {self.inputs}")
         self.state = 'terminated'
+        self.outputs = {'parent': self.id, 'distance': self.id}
+

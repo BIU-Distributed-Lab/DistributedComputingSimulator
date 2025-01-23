@@ -158,10 +158,12 @@ class Initialization:
                     raise ParseTopologyFileError(f"ID {id} not found in ids_list when parsing input")
                 attr_str = attr_str.strip('[]').split(',')
                 logger.debug(f"Inputs for ID {id}: {attr_str}")
-                if len(attr_str) != len(input_names):
+                if len(attr_str) > len(input_names):
                     raise ParseTopologyFileError(f"Number of Inputs does not match the number of Input names on ID {id}")
+
                 for name, value in zip(input_names, attr_str):
-                    setattr(self.network_dict[id], name.strip(), value)
+                    self.network_dict[id].inputs[name.strip()] = value
+                    logger.info(f"ID {id} has input {name.strip()} with value {value}")
 
 
 
