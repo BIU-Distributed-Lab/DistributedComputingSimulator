@@ -110,7 +110,7 @@ class Communication:
                 algorithm_function(comp, self, arrival_time, message_content)
 
             if self.network.display_type == "Graph" and comp.has_changed():
-                self.network.node_values_change.append(comp.__dict__.copy())
+                self.network.node_values_change.append((comp.__dict__.copy(), arrival_time))
                 comp.reset_flag()
         else:
             logger.info(f"Error: Function '{function_name}' not found in {comp.algorithm_file}.py")

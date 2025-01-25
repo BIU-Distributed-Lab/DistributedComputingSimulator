@@ -11,6 +11,7 @@ def wheelEvent(self, event):
     factor = self.zoom_factor if delta_y > 0 else 1 / self.zoom_factor
     self.view.scale(factor, factor)
 
+
 def regenarate_clicked(self):
     """
     Generate a new layout if the current choice in the combo box is 'random'.
@@ -20,7 +21,8 @@ def regenarate_clicked(self):
     """
     if self.choice_combo.currentText() == "random":
         self.set_nx_layout("random")
-        
+
+
 def toggle_timer(self):
     """
     Toggle the timer based on the QCheckBox state.
@@ -32,6 +34,7 @@ def toggle_timer(self):
     else:
         self.timer.stop()
 
+
 def update_timer_interval(self):
     """
     Update the timer interval based on the slider value.
@@ -40,7 +43,8 @@ def update_timer_interval(self):
     """
     new_interval = self.slider.value()
     self.timer.setInterval(abs(new_interval))
-    
+
+
 def update_slider_label(self):
     """
     Update the slider label to show the interval in seconds per tick.
@@ -48,6 +52,7 @@ def update_slider_label(self):
     This method updates the label that shows the current slider value in seconds.
     """
     self.slider_label.setText(f"{abs(self.slider.value() / 1000)} seconds per tick")
+
 
 def reset(self):
     """
@@ -57,6 +62,7 @@ def reset(self):
     """
     while self.change_stack:
         self.undo_change()
+
 
 def undo_change(self):
     """
@@ -73,8 +79,9 @@ def undo_change(self):
         self.network.node_values_change.insert(0, next_state)
 
         previous_node_item.update()
-              
-def change_node_color(self, times):
+
+
+def change_node_color(self, times, sync):
     """
     Change the color of a node based on the current state in the network.
 
@@ -83,12 +90,29 @@ def change_node_color(self, times):
     Args:
         times (int): The number of times to update the node color.
     """
-    for _ in range(times):
-        if self.network.node_values_change:
-            values_change_dict = self.network.node_values_change.pop(0)
-            node_name = values_change_dict.get('id')
-            if node_name != None:
-                self.update_node_color(node_name, values_change_dict)
+
+    if sync:
+        for _ in range(times):
+            round_changes = []
+            if self.network.node_values_change:
+                current_round = self.network.node_values_change[0][1]
+                round_changes.append(self.network.node_values_change.pop(0))
+                while len(self.network.node_values_change) and self.network.node_values_change[0][1] == current_round:
+                    round_changes.append(self.network.node_values_change.pop(0))
+
+                for values_change_dict, _ in round_changes:
+                    node_name = values_change_dict.get('id')
+                    if node_name is not None:
+                        self.update_node_color(node_name, values_change_dict)
+
+    else:
+        for _ in range(times):
+            if self.network.node_values_change:
+                values_change_dict = self.network.node_values_change.pop(0) # (values, round)
+                values_change_dict = values_change_dict[0]
+                node_name = values_change_dict.get('id')
+                if node_name != None:
+                    self.update_node_color(node_name, values_change_dict)
 
 
 def update_node_color(self, node_name, values_change_dict):

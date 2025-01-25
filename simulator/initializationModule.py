@@ -202,6 +202,7 @@ class Initialization:
         self.delay_type = network_variables_data.get('Delay', 'Random')
         self.algorithm_path = network_variables_data.get('Algorithm', 'no_alg_provided')
         self.logging_type = network_variables_data.get('Logging', 'Short')
+        self.sync = network_variables_data.get('Sync')
 
     def __str__(self) -> list:
         """

@@ -53,6 +53,7 @@ def sync_run(network: initializationModule.Initialization, comm: communication.C
     all_terminated = len(network.connected_computers)
 
     while all_terminated > 0:
+        logger.info("Current round: %s", current_round)
         all_terminated = len(network.connected_computers)
 
         for comp in network.connected_computers:
@@ -62,6 +63,7 @@ def sync_run(network: initializationModule.Initialization, comm: communication.C
 
             # Get messages for the current computer from the dictionary and clear the key
             current_messages = network.message_queue.get_messages_for_specific_dest(comp.id, current_round)
+            logger.info("Current messages for computer %s: %s", comp.id, current_messages)
             network.message_queue.clear_key(comp.id)
 
             comm.run_algorithm(comp, 'mainAlgorithm', current_round, current_messages)

@@ -204,7 +204,8 @@ class GraphVisualizer(QWidget):
         Args:
             times (int): The number of times to change the node color.
         """
-        gf.change_node_color(self, times)
+        sync = self.network.sync == "Sync"
+        gf.change_node_color(self, times, sync)
         
     def update_node_color(self, node_name, values_change_dict):
         """
