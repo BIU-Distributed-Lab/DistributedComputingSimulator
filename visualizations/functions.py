@@ -1,3 +1,6 @@
+from utils.logger_config import logger
+
+
 def wheelEvent(self, event):
     """
     Zoom in or out on mouse wheel event.
@@ -133,6 +136,7 @@ def update_node_color(self, node_name, values_change_dict):
         if not key.startswith("_") and previous_state.get(key) != value:
             changes.append(f"'{key}' changed to '{value}'")
             #print(f"Key '{key}' changed to '{value}'")
+            logger.debug(f"Key '{key}' changed to '{value}'")
 
     node_item.color = node_item.values['color']
     next_state = node_item.values.copy()
@@ -141,7 +145,7 @@ def update_node_color(self, node_name, values_change_dict):
     node_item.update()
 
     # Update the label with the changes
-    if changes:
-        self.last_phase_label.setText(f"Last phase changes in node {node_name}: " + ", ".join(changes))
-    else:
-        self.last_phase_label.setText("Last phase: No changes")
+    # if changes:
+    #     self.last_phase_label.setText(f"Last phase changes in node {node_name}: " + ", ".join(changes))
+    # else:
+    #     self.last_phase_label.setText("Last phase: No changes")

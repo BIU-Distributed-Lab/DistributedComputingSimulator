@@ -1,0 +1,11 @@
+IDs List:
+1,2,3,4,5
+Number of Computers:
+5
+Root ID:
+Random
+Edges:
+(1,2),(2,3),(3,4),(4,5)
+Input:
+[height,weight]
+1:[11]

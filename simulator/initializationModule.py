@@ -142,8 +142,13 @@ class Initialization:
             self.connected_computers = [Computer(new_id=new_id) for new_id in ids_set]
             self.network_dict = {comp.id: comp for comp in self.connected_computers}
 
-            if root_id.lower() == "random":
+            if isinstance(root_id, str) and root_id.lower() == "random":
                 selected_computer = random.choice(self.connected_computers)
+                selected_computer.is_root = True
+            else:
+                selected_computer = self.network_dict.get(root_id)
+                if selected_computer is None:
+                    raise ParseTopologyFileError(f"Root ID {root_id} not found in ids_list")
                 selected_computer.is_root = True
 
             for u, v in edges_set:
@@ -174,6 +179,7 @@ class Initialization:
             self.delay_type = network_variables.get('Delay', 'Random')
             self.algorithm_path = network_variables.get('Algorithm', 'no_alg_provided')
             self.logging_type = network_variables.get('Logging', 'Short')
+            self.sync = network_variables.get('Sync')
 
             # check if graph is connected if not return to main menu
             connected = self.is_connected()
