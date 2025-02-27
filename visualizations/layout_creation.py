@@ -59,6 +59,19 @@ def layoutCreation(self):
     # self.regenarate_button.clicked.connect(self.regenarate_clicked)
 
     main_layout = QVBoxLayout(self)
+
+    self.round_label = QLabel("Round: 0")
+    self.round_label.setAlignment(Qt.AlignCenter)  # Center the label
+    font = self.round_label.font()
+    font.setPointSize(16)  # Set the font size to 16
+    self.round_label.setFont(font)
+
+    round_label_layout = QHBoxLayout()
+    round_label_layout.addStretch(1)
+    round_label_layout.addWidget(self.round_label)
+    round_label_layout.addStretch(1)
+    main_layout.addLayout(round_label_layout)  # Add the centered round label layout
+
     # main_layout.addWidget(self.choice_combo)
     # main_layout.addWidget(self.regenarate_button)
     main_layout.addWidget(self.view)
@@ -85,7 +98,6 @@ def layoutCreation(self):
     slider_h_layout.addWidget(self.slider_label)
 
     buttons_layout = QGridLayout()
-
 
     # Add a label to show what happened in the last phase
     #self.last_phase_label = QLabel("Last phase: None")

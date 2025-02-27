@@ -94,7 +94,11 @@ def change_node_color(self, times, sync):
         times (int): The number of times to update the node color.
     """
 
+    if not hasattr(self, 'current_round'):
+        self.current_round = 0
+
     if sync:
+        self.round_label.show()  # Show the label in synchronous mode
         for _ in range(times):
             round_changes = []
             if self.network.node_values_change:
@@ -108,7 +112,12 @@ def change_node_color(self, times, sync):
                     if node_name is not None:
                         self.update_node_color(node_name, values_change_dict)
 
+            if round_changes:  # Only update the round if there are changes
+                self.current_round += 1
+                self.round_label.setText(f"Round: {self.current_round}")
+
     else:
+        self.round_label.hide()  # Hide the label in asynchronous mode
         for _ in range(times):
             if self.network.node_values_change:
                 values_change_dict = self.network.node_values_change.pop(0) # (values, round)
