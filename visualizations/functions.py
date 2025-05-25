@@ -67,21 +67,103 @@ def reset(self):
         self.undo_change()
 
 
+def update_node_color(self, node_name, values_change_dict):
+    """
+    Update the node's color and state based on the provided values.
+
+    This method updates the node's color and other values based on the 'values_change_dict', and it stores the current state in the change stack for undo purposes.
+
+    Args:
+        node_name (str): The name (ID) of the node whose color is to be updated.
+        values_change_dict (dict): The dictionary containing the updated values for the node.
+    """
+    node_item = self.nodes_map[str(node_name)]
+    previous_state = node_item.values.copy()
+    changes = []
+    for key, value in values_change_dict.items():
+        node_item.values[key] = value
+        if not key.startswith("_") and previous_state.get(key) != value:
+            changes.append(f"'{key}' changed to '{value}'")
+            logger.debug(f"Key '{key}' changed to '{value}'")
+
+    node_item.color = node_item.values['color']
+    next_state = node_item.values.copy()
+    
+    # Store the round number with the changes for synchronous mode
+    current_round = getattr(self, 'current_round', 0)
+    self.change_stack.insert(0, (node_item, previous_state, current_round))
+    self.change_stack.insert(1, (node_item, next_state, current_round))
+    node_item.update()
+
+
 def undo_change(self):
     """
-    Undo the last change made to a node.
+    Undo the last change made to nodes.
+    In synchronous mode, undoes all changes from the last round.
+    In asynchronous mode, undoes the last single change.
 
-    This method is triggered when the 'undo' button is pressed. It retrieves the last change from the change stack, reverts the node's state, and updates the network.
+    This method is triggered when the 'undo' button is pressed.
     """
-    if self.change_stack:
-        previous_node_item, previous_state = self.change_stack.pop(0)
-        previous_node_item.values = previous_state
-        previous_node_item.color = previous_state['color']
+    if not self.change_stack:
+        return
 
-        _, next_state = self.change_stack.pop(0)
-        self.network.node_values_change.insert(0, next_state)
+    if hasattr(self, 'current_round') and self.network.sync == "Sync":
+        if len(self.change_stack) < 2:
+            return
+            
+        # Get the round number of the last change
+        _, _, last_round = self.change_stack[0]
+        
+        # Find all changes from the last round
+        changes_to_undo = []
+        next_states = []
+        
+        # Keep track of how many items we've processed
+        items_to_remove = 0
+        
+        # Gather all changes from the current round
+        for i in range(0, len(self.change_stack) - 1, 2):
+            if i + 1 >= len(self.change_stack):
+                break
+                
+            node_item, previous_state, round_num = self.change_stack[i]
+            _, next_state, _ = self.change_stack[i + 1]
+            
+            if round_num != last_round:
+                break
+                
+            changes_to_undo.append((node_item, previous_state))
+            next_states.append((node_item, next_state))
+            items_to_remove += 2
+            
+        # Remove the processed items from the stack
+        for _ in range(items_to_remove):
+            self.change_stack.pop(0)
+            
+        # Apply all changes from the round
+        for node_item, previous_state in changes_to_undo:
+            node_item.values = previous_state
+            node_item.color = previous_state['color']
+            node_item.update()
+            
+        # Update the network state
+        for node_item, next_state in next_states:
+            self.network.node_values_change.insert(0, (next_state, last_round))
+            
+        # Update the round counter
+        if self.current_round > 0:
+            self.current_round -= 1
+            self.round_label.setText(f"Round: {self.current_round}")
+    else:
+        # Asynchronous mode - undo single change
+        if len(self.change_stack) >= 2:
+            node_item, previous_state, _ = self.change_stack.pop(0)
+            node_item.values = previous_state
+            node_item.color = previous_state['color']
+            node_item.update()
 
-        previous_node_item.update()
+            _, next_state, _ = self.change_stack.pop(0)
+            self.network.node_values_change.insert(0, (next_state, 0))  # Round 0 for async mode
 
 
 def change_node_color(self, times, sync):
@@ -125,36 +207,3 @@ def change_node_color(self, times, sync):
                 node_name = values_change_dict.get('id')
                 if node_name != None:
                     self.update_node_color(node_name, values_change_dict)
-
-
-def update_node_color(self, node_name, values_change_dict):
-    """
-    Update the node's color and state based on the provided values.
-
-    This method updates the node's color and other values based on the 'values_change_dict', and it stores the current state in the change stack for undo purposes.
-
-    Args:
-        node_name (str): The name (ID) of the node whose color is to be updated.
-        values_change_dict (dict): The dictionary containing the updated values for the node.
-    """
-    node_item = self.nodes_map[str(node_name)]
-    previous_state = node_item.values.copy()
-    changes = []
-    for key, value in values_change_dict.items():
-        node_item.values[key] = value
-        if not key.startswith("_") and previous_state.get(key) != value:
-            changes.append(f"'{key}' changed to '{value}'")
-            #print(f"Key '{key}' changed to '{value}'")
-            logger.debug(f"Key '{key}' changed to '{value}'")
-
-    node_item.color = node_item.values['color']
-    next_state = node_item.values.copy()
-    self.change_stack.insert(0, (node_item, previous_state))
-    self.change_stack.insert(1, (node_item, next_state))
-    node_item.update()
-
-    # Update the label with the changes
-    # if changes:
-    #     self.last_phase_label.setText(f"Last phase changes in node {node_name}: " + ", ".join(changes))
-    # else:
-    #     self.last_phase_label.setText("Last phase: No changes")
