@@ -49,6 +49,21 @@ def async_run(network: initializationModule.Initialization, comm: communication.
 
 
 def sync_run(network: initializationModule.Initialization, comm: communication.Communication):
+    """
+    Runs the network algorithm synchronously on the created network.
+    First runs the initialization phase, then proceeds with synchronous rounds.
+
+    Args:
+        network (Initialization): The initialized network with connected computers.
+        comm (Communication): The communication object handling message passing between computers.
+    """
+    # Initialization phase - run init() for every computer
+    for comp in network.connected_computers:
+        comm.run_algorithm(comp, 'init')
+
+    logger.info("************************************************************************************")
+    logger.info("Initialization phase completed, starting synchronous rounds")
+
     current_round = 0
     all_terminated = len(network.connected_computers)
 

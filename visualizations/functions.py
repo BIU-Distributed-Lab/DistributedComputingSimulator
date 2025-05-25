@@ -154,6 +154,9 @@ def undo_change(self):
         if self.current_round > 0:
             self.current_round -= 1
             self.round_label.setText(f"Round: {self.current_round}")
+        elif self.current_round == 0:
+            self.current_round = -1
+            self.round_label.setText("Initialization Phase")
     else:
         # Asynchronous mode - undo single change
         if len(self.change_stack) >= 2:
@@ -170,14 +173,15 @@ def change_node_color(self, times, sync):
     """
     Change the color of a node based on the current state in the network.
 
-    This method is called when a button is clicked and updates the color of a node based on the values in 'node_values_change'. It can update the color multiple times based on the 'times' argument.
+    This method is called when a button is clicked and updates the color of a node based on the values in 'node_values_change'.
+    In synchronous mode, it handles initialization phase changes before round 0.
 
     Args:
         times (int): The number of times to update the node color.
+        sync (bool): Whether the network is running in synchronous mode.
     """
-
     if not hasattr(self, 'current_round'):
-        self.current_round = 0
+        self.current_round = -1  # Start at -1 to represent initialization phase
 
     if sync:
         self.round_label.show()  # Show the label in synchronous mode
@@ -194,16 +198,20 @@ def change_node_color(self, times, sync):
                     if node_name is not None:
                         self.update_node_color(node_name, values_change_dict)
 
-            if round_changes:  # Only update the round if there are changes
-                self.current_round += 1
-                self.round_label.setText(f"Round: {self.current_round}")
+                # Update round counter
+                if self.current_round == -1:  # If we're in initialization phase
+                    self.current_round = 0  # Move to round 0
+                    self.round_label.setText("Initialization Phase")
+                else:  # Normal round progression
+                    self.current_round += 1
+                    self.round_label.setText(f"Round: {self.current_round}")
 
     else:
         self.round_label.hide()  # Hide the label in asynchronous mode
         for _ in range(times):
             if self.network.node_values_change:
-                values_change_dict = self.network.node_values_change.pop(0) # (values, round)
+                values_change_dict = self.network.node_values_change.pop(0)  # (values, round)
                 values_change_dict = values_change_dict[0]
                 node_name = values_change_dict.get('id')
-                if node_name != None:
+                if node_name is not None:
                     self.update_node_color(node_name, values_change_dict)

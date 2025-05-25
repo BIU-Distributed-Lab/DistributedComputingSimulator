@@ -6,19 +6,28 @@ import numpy as np
 colors = ["blue", "red", "green", "yellow", "purple", "pink", "orange", "cyan", "magenta", "lime", "teal", "lavender",
           "brown", "maroon", "navy", "olive", "coral", "salmon", "gold", "silver"]
 
-def mainAlgorithm(self: computer.Computer, communication: Communication, round, messages: list[Message] = None):
 
+def init(self: computer.Computer, communication: Communication):
+    """
+    Initialize the node's state before starting the synchronous rounds.
+    """
+    if self.is_root:
+        self.distance = 0
+        self.parent = self.id
+        self.color = colors[0]
+        self.state = "running"
+    else:
+        self.distance = np.inf
+        self.parent = None
+        self.state = "running"
+
+
+def mainAlgorithm(self: computer.Computer, communication: Communication, round, messages: list[Message] = None):
     if round == 0:
-        # Initialize the root node
+        # Send initial message if root
         if self.is_root:
-            self.distance = 0
-            self.parent = self.id
             communication.send_to_all(self.id, f"INITIALIZE {self.distance} {self.parent}", round)
-            self.color = colors[0]
             self.state = "terminated"
-        else:
-            self.distance = np.inf
-            self.parent = None
     else:
         for message in messages:
             message_parts = message.content.split(" ")

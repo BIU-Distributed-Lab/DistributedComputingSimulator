@@ -5,16 +5,19 @@ import numpy as np
 import random
 
 
+def init(self: computer.Computer, communication: Communication):
+    """
+    Initialize the node's state before starting the synchronous rounds.
+    """
+    self.active = True
+    self.in_mis = False
+    self.priority = None
+    self.color = "white"
+    self.state = "running"
+
 
 def mainAlgorithm(self: computer.Computer, communication: Communication, round, messages: list[Message] = None):
     step = round % 3  # 0: send priority, 1: receive priorities, 2: receive IN_MIS
-
-    if round == 0:
-        # Initialize the state
-        self.active = True
-        self.in_mis = False
-        self.priority = None
-        self.color = "white"
 
     if self.state == "terminated":
         return
