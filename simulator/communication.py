@@ -7,6 +7,7 @@ This module handles the sending and receiving of messages between computers in t
 import random
 from simulator.computer import Computer
 import simulator.initializationModule as initializationModule
+from simulator.message import Message
 from utils.logger_config import logger
 TERMINATED_STATE = "terminated"
 
@@ -56,12 +57,12 @@ class Communication:
             elif self.network.delay_type == 'Constant':
                 delay = 1
 
-            message = {
-                'source_id': source,
-                'dest_id': dest,
-                'arrival_time': sent_time + delay,
-                'content': message_info,
-            }
+            message = Message(
+                source_id=source,
+                dest_id=dest,
+                arrival_time=sent_time + delay,
+                content=message_info
+            )
             self.network.message_queue.push(message)
 
     def send_to_all(self, source_id, message_info, sent_time=None):
@@ -77,20 +78,19 @@ class Communication:
         for index, connected_computer_id in enumerate(source_computer.connectedEdges):
             self.send_message(source_id, connected_computer_id, message_info, sent_time)
 
-    def receive_message(self, message: dict, comm):
+    def receive_message(self, message: Message, comm):
         """
         Receives a message and runs the appropriate algorithm on the destination computer.
         
         Args:
-            message (dict): The message that was received.
+            message (Message): The message that was received.
             comm (Communication): The communication object handling the message passing.
         """
         if self.network.logging_type == "Long":
-            logger.info(message)
+            logger.info(message.to_dict())
 
-        received_id = message['dest_id']
-        received_computer = self.network.network_dict.get(received_id)
-        self.run_algorithm(received_computer, 'mainAlgorithm', message['arrival_time'], message['content'])
+        received_computer = self.network.network_dict.get(message.dest_id)
+        self.run_algorithm(received_computer, 'mainAlgorithm', message.arrival_time, message.content)
 
     def run_algorithm(self, comp: Computer, function_name: str, arrival_time=None, message_content=None):
         """

@@ -1,11 +1,12 @@
 import simulator.computer as computer
 from simulator.communication import Communication
+from simulator.message import Message
 import numpy as np
 
 colors = ["blue", "red", "green", "yellow", "purple", "pink", "orange", "cyan", "magenta", "lime", "teal", "lavender",
           "brown", "maroon", "navy", "olive", "coral", "salmon", "gold", "silver"]
 
-def mainAlgorithm(self: computer.Computer, communication: Communication, round, messages=None):
+def mainAlgorithm(self: computer.Computer, communication: Communication, round, messages: list[Message] = None):
 
     if round == 0:
         # Initialize the root node
@@ -20,7 +21,7 @@ def mainAlgorithm(self: computer.Computer, communication: Communication, round, 
             self.parent = None
     else:
         for message in messages:
-            message_parts = message["content"].split(" ")
+            message_parts = message.content.split(" ")
             dist = float(message_parts[1])
             parent = int(message_parts[2])
 

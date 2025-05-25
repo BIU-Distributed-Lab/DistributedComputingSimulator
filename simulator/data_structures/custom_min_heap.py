@@ -1,4 +1,6 @@
 import heapq
+from simulator.message import Message
+
 class CustomMinHeap:
     """
     A class to represent a custom min-heap for managing messages.
@@ -15,25 +17,25 @@ class CustomMinHeap:
         self.heap = []
         self.counter = 0  # unique sequence count
 
-    def push(self, message_format):
+    def push(self, message: Message):
         """
         Pushes a message onto the heap.
 
         Args:
-            message_format (dict): The message format containing arrival time.
+            message (Message): The message to add.
         """
-        heapq.heappush(self.heap, (message_format['arrival_time'], self.counter, message_format))
+        heapq.heappush(self.heap, (message.arrival_time, self.counter, message))
         self.counter += 1
 
-    def pop(self) -> dict:
+    def pop(self) -> Message:
         """
         Pops the message with the smallest arrival time from the heap.
 
         Returns:
-            dict: The message with the smallest arrival time.
+            Message: The message with the smallest arrival time.
         """
-        priority, priority2, message_format = heapq.heappop(self.heap)
-        return message_format
+        priority, priority2, message = heapq.heappop(self.heap)
+        return message
 
     def empty(self) -> bool:
         """

@@ -1,5 +1,6 @@
 import simulator.computer as computer
 from simulator.communication import Communication
+from simulator.message import Message
 import numpy as np
 from utils.logger_config import logger
 
@@ -15,7 +16,7 @@ colors = ["blue", "red", "green", "yellow", "purple", "pink", "orange", "cyan", 
           "brown", "maroon", "navy", "olive", "coral", "salmon", "gold", "silver"]
 
 
-def mainAlgorithm(self: computer.Computer, communication: Communication, _arrival_time, message=None):
+def mainAlgorithm(self: computer.Computer, communication: Communication, _arrival_time, message: str = None):
     message_parts = message.split(" ")
     dist = float(message_parts[-3])
     parent = int(message_parts[-1])

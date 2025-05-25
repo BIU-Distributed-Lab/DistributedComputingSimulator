@@ -1,4 +1,6 @@
 # simulator/data_structures/custom_dict.py
+from simulator.message import Message
+
 class CustomDict:
     """
     A class to represent a custom dictionary for managing messages.
@@ -13,47 +15,46 @@ class CustomDict:
         """
         self.dict = {}
 
-    def push(self, message_format):
+    def push(self, message: Message):
         """
         Adds a message to the dictionary.
 
         Args:
-            message_format (dict): The message format to add.
+            message (Message): The message to add.
         """
-        dest_id = message_format['dest_id']
-        round = message_format['arrival_time']
+        dest_id = message.dest_id
+        round = message.arrival_time
         key = (dest_id, round)
 
         if key not in self.dict:
             self.dict[key] = []
-        self.dict[key].append(message_format)
+        self.dict[key].append(message)
 
-
-    def remove(self, message_format):
+    def remove(self, message: Message):
         """
         Removes a message from the dictionary.
 
         Args:
-            message_format (dict): The message format to remove.
+            message (Message): The message to remove.
         """
-        dest_id = message_format['dest_id']
+        dest_id = message.dest_id
         if dest_id in self.dict:
-            self.dict[dest_id].remove(message_format)
+            self.dict[dest_id].remove(message)
             if not self.dict[dest_id]:
                 del self.dict[dest_id]
 
-    def contains(self, message_format) -> bool:
+    def contains(self, message: Message) -> bool:
         """
         Checks whether the dictionary contains a message.
 
         Args:
-            message_format (dict): The message format to check.
+            message (Message): The message to check.
 
         Returns:
             bool: True if the dictionary contains the message, False otherwise.
         """
-        dest_id = message_format['dest_id']
-        return dest_id in self.dict and message_format in self.dict[dest_id]
+        dest_id = message.dest_id
+        return dest_id in self.dict and message in self.dict[dest_id]
 
     def empty(self) -> bool:
         """
@@ -79,16 +80,17 @@ class CustomDict:
         """
         self.dict.clear()
 
-    def get_messages_for_specific_dest(self, dest_id, current_round):
+    def get_messages_for_specific_dest(self, dest_id, current_round) -> list[Message]:
         """
-        Returns all messages in the dictionary for a specific destination ID.
-        if dest_id is not in the dictionary, return an empty list.
+        Returns all messages in the dictionary for a specific destination ID and round.
+        If dest_id is not in the dictionary, return an empty list.
 
         Args:
             dest_id (int): The destination ID for which to retrieve messages.
+            current_round (int): The current round number.
 
         Returns:
-            list: A list of messages for the specified destination ID.
+            list[Message]: A list of messages for the specified destination ID and round.
         """
         key = (dest_id, current_round)
         return self.dict.get(key, [])
@@ -103,11 +105,11 @@ class CustomDict:
         if dest_id in self.dict:
             del self.dict[dest_id]
 
-    def get_all_messages(self):
+    def get_all_messages(self) -> list[Message]:
         """
         Returns all messages in the dictionary.
 
         Returns:
-            list: A list of all messages in the dictionary.
+            list[Message]: A list of all messages in the dictionary.
         """
         return [msg for messages in self.dict.values() for msg in messages]

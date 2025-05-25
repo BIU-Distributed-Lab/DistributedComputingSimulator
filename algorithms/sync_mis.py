@@ -1,11 +1,12 @@
 import simulator.computer as computer
 from simulator.communication import Communication
+from simulator.message import Message
 import numpy as np
 import random
 
 
 
-def mainAlgorithm(self: computer.Computer, communication: Communication, round, messages=None):
+def mainAlgorithm(self: computer.Computer, communication: Communication, round, messages: list[Message] = None):
     step = round % 3  # 0: send priority, 1: receive priorities, 2: receive IN_MIS
 
     if round == 0:
@@ -30,7 +31,7 @@ def mainAlgorithm(self: computer.Computer, communication: Communication, round, 
         if self.active:
             highest = True
             for msg in messages:
-                parts = msg["content"].split(" ")
+                parts = msg.content.split(" ")
                 if parts[0] == "PRIORITY":
                     neighbor_priority = float(parts[1])
                     if neighbor_priority > self.priority:
@@ -46,7 +47,7 @@ def mainAlgorithm(self: computer.Computer, communication: Communication, round, 
         # If neighbor is in MIS, deactivate
         if self.active:
             for msg in messages:
-                if msg["content"] == "IN_MIS":
+                if msg.content == "IN_MIS":
                     self.active = False
                     self.color = "gray"
                     break
