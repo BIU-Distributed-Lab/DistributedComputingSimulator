@@ -8,7 +8,7 @@ from utils.logger_config import logger
 class Computer:
     """
     A class representing a computer in the network.
-    
+
     Attributes:
         id (int): The ID of the computer.
         connectedEdges (list of int): List of computer IDs to which this computer is connected.
@@ -18,13 +18,13 @@ class Computer:
         color (str): The color associated with this computer, used in visualization.
         _has_changed (bool): A private flag indicating whether the computer's state has changed.
     """
-    
+
     def __init__(self, new_id=None):
         """
         Initializes a Computer object with default values for attributes.
         """
         self._has_changed = False
-                
+
         self.id = new_id
         self.connectedEdges = []
         self.algorithm_file=None
@@ -38,25 +38,25 @@ class Computer:
     def __str__(self):
         """
         Provides a string representation of the computer's ID, connections, and delays.
-        
+
         Returns:
             str: The string representation of the computer.
         """
         return f"id = {self.id}\nconnected edges = {self.connectedEdges}\n"
-    
+
     def __setattr__(self, name, value):
         """
         Overrides the default setattr method to set the `_has_changed` flag when non-private attributes change.
-        
+
         Args:
             name (str): The name of the attribute being set.
             value (Any): The value to set the attribute to.
         """
         # Only set the flag if the attribute is not private
-        if not name.startswith('_') and getattr(self, name, None) != value:
+        if not name.startswith('_') and getattr(self, name, None) != value and name != "algorithm_file" and name != "id" and name != "connectedEdges" and name != "delays":
             self._has_changed = True
             # print the id and what is changing
-            #logger.info(f"Computer {self.id} is changing {name} to {value}")
+            logger.info(f"Computer {self.id} is changing {name} to {value}")
         super().__setattr__(name, value)
 
     def reset_flag(self):
@@ -68,25 +68,25 @@ class Computer:
     def has_changed(self):
         """
         Returns whether the computer's state has changed.
-        
+
         Returns:
             bool: True if the state has changed, False otherwise.
         """
         return self._has_changed
-    
+
     def getConnectedEdges(self):
         """
         Returns the list of IDs of connected computers (edges).
-        
+
         Returns:
             list of int: The connected edges for this computer.
         """
         return self.connectedEdges
-    
+
     def getDelays(self):
         """
         Returns the list of delays for the connected edges.
-        
+
         Returns:
             list of float: The delays associated with the connected edges.
         """
