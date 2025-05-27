@@ -1,6 +1,7 @@
 import simulator.computer as computer
 from simulator.communication import Communication
 from simulator.message import Message
+from simulator.config import NodeState
 import numpy as np
 from utils.logger_config import logger
 
@@ -36,7 +37,7 @@ def init(self: computer.Computer, communication: Communication):
         self.distance = 0
         communication.send_to_all(self.id, f"running a BFS with distance {self.distance} from {self.parent}")
         self.color = "#000000"
-        self.state = "terminated"
+        self.state = NodeState.TERMINATED
     else:
         self.parent = None
         self.distance = np.inf

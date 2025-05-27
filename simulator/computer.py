@@ -4,6 +4,9 @@ Computer module representing a node in the distributed network simulation.
 This module defines the `Computer` class, which is used to represent a computer node in the network, including its connections, delays, and other properties.
 """
 from utils.logger_config import logger
+from simulator.config import NodeState
+from typing import Optional, List
+
 
 class Computer:
     """
@@ -13,7 +16,6 @@ class Computer:
         id (int): The ID of the computer.
         connectedEdges (list of int): List of computer IDs to which this computer is connected.
         algorithm_file (module): The algorithm file associated with this computer.
-        state (str): The state of the computer (e.g., active, idle, terminated).
         is_root (bool): Whether this computer is designated as the root node in the network.
         color (str): The color associated with this computer, used in visualization.
         _has_changed (bool): A private flag indicating whether the computer's state has changed.
@@ -24,16 +26,29 @@ class Computer:
         Initializes a Computer object with default values for attributes.
         """
         self._has_changed = False
-
         self.id = new_id
         self.connectedEdges = []
-        self.algorithm_file=None
-        self.state = None
+        self.algorithm_file = None
+        self._state = NodeState.ACTIVE
         self.is_root = False
         self.color = "olivedrab"
-
         self.inputs = {}
         self.outputs = {}
+
+    @property
+    def state(self) -> NodeState:
+        """Get the current state of the computer."""
+        return self._state
+
+    @state.setter
+    def state(self, value: NodeState) -> None:
+        """Set the state, ensuring it's a valid NodeState value."""
+        if not isinstance(value, NodeState):
+            raise ValueError(f"State must be a NodeState enum value, got {type(value)}")
+        if self._state != value:
+            self._has_changed = True
+            logger.info(f"Computer {self.id} is changing state from {self._state.value} to {value.value}")
+            self._state = value
 
     def __str__(self):
         """

@@ -6,6 +6,7 @@ This module initializes the network, runs the algorithms on each computer, and m
 
 import simulator.initializationModule as initializationModule
 import simulator.communication as communication
+from simulator.config import NodeState
 from utils.logger_config import logger
 
 def initiateRun(network: initializationModule.Initialization, comm: communication.Communication, sync: str):
@@ -72,7 +73,7 @@ def sync_run(network: initializationModule.Initialization, comm: communication.C
         all_terminated = len(network.connected_computers)
 
         for comp in network.connected_computers:
-            if comp.state == "terminated":
+            if comp.state == NodeState.TERMINATED:
                 all_terminated -= 1
                 continue
 

@@ -1,6 +1,7 @@
 import simulator.computer as computer
 from simulator.communication import Communication
 from simulator.message import Message
+from simulator.config import NodeState
 import numpy as np
 
 colors = ["blue", "red", "green", "yellow", "purple", "pink", "orange", "cyan", "magenta", "lime", "teal", "lavender",
@@ -15,11 +16,11 @@ def init(self: computer.Computer, communication: Communication):
         self.distance = 0
         self.parent = self.id
         self.color = colors[0]
-        self.state = "running"
+        self.state = NodeState.ACTIVE
     else:
         self.distance = np.inf
         self.parent = None
-        self.state = "running"
+        self.state = NodeState.ACTIVE
 
 
 def mainAlgorithm(self: computer.Computer, communication: Communication, round, messages: list[Message] = None):
@@ -27,7 +28,7 @@ def mainAlgorithm(self: computer.Computer, communication: Communication, round, 
         # Send initial message if root
         if self.is_root:
             communication.send_to_all(self.id, f"INITIALIZE {self.distance} {self.parent}", round)
-            self.state = "terminated"
+            self.state = NodeState.TERMINATED
     else:
         for message in messages:
             message_parts = message.content.split(" ")
@@ -39,4 +40,4 @@ def mainAlgorithm(self: computer.Computer, communication: Communication, round, 
                 self.distance = dist + 1
                 communication.send_to_all(self.id, f"UPDATE {self.distance} {self.id}", round)
                 self.color = colors[int(self.distance) % len(colors)]
-                self.state = "terminated"
+                self.state = NodeState.TERMINATED
