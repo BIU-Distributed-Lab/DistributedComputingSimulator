@@ -81,7 +81,8 @@ def sync_run(network: initializationModule.Initialization, comm: communication.C
             current_messages = network.message_queue.get_messages_for_specific_dest(comp.id, current_round)
             #logger.info("Current messages for computer %s: %s", comp.id, current_messages)
             network.message_queue.clear_key(comp.id)
-
+            # we want to take only the content of each message and send as alist
+            current_messages = [message.content for message in current_messages]
             comm.run_algorithm(comp, 'mainAlgorithm', current_round, current_messages)
 
         current_round += 1

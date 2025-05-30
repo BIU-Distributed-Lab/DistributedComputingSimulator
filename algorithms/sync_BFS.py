@@ -23,7 +23,7 @@ def init(self: computer.Computer, communication: Communication):
         self.state = NodeState.ACTIVE
 
 
-def mainAlgorithm(self: computer.Computer, communication: Communication, round, messages: list[Message] = None):
+def mainAlgorithm(self: computer.Computer, communication: Communication, round, messages = None):
     if round == 0:
         # Send initial message if root
         if self.is_root:
@@ -31,7 +31,7 @@ def mainAlgorithm(self: computer.Computer, communication: Communication, round, 
             self.state = NodeState.TERMINATED
     else:
         for message in messages:
-            message_parts = message.content.split(" ")
+            message_parts = message.split(" ")
             dist = float(message_parts[1])
             parent = int(message_parts[2])
 

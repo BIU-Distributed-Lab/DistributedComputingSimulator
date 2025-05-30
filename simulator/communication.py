@@ -10,7 +10,7 @@ import simulator.initializationModule as initializationModule
 from simulator.message import Message
 from utils.logger_config import logger
 TERMINATED_STATE = "terminated"
-
+import simulator.errorModule as errorModule
 
 class Communication:
     """
@@ -30,7 +30,7 @@ class Communication:
         self.network = network
 
     # Send a message from the source computer to the destination computer
-    def send_message(self, source, dest, message_info, sent_time=None):
+    def send_message(self, source, dest, message_info, sent_time=None, corruption_info=None):
         """
         Sends a message from the source computer to the destination computer, with optional arrival time.
         if the destination computer is terminated, the message will not be sent.
@@ -41,7 +41,12 @@ class Communication:
             dest (int): The ID of the destination computer receiving the message.
             message_info (str): The content of the message being sent.
             sent_time (float, optional): The time at which the message was sent. If None, defaults to 0.
+            corruption_info (dict, optional): The corruption information of the message being sent.
         """
+        # check if dest connected to source
+        if dest not in self.network.network_dict.get(source).connectedEdges:
+            return
+        
         current_computer = self.network.network_dict.get(source)
 
         current_computer_terminated = current_computer.state == TERMINATED_STATE
@@ -63,9 +68,14 @@ class Communication:
                 arrival_time=sent_time + delay,
                 content=message_info
             )
+            
+
+            if corruption_info is not None:
+                message.content = errorModule.corrupt_message(message.content, corruption_info)
+
             self.network.message_queue.push(message)
 
-    def send_to_all(self, source_id, message_info, sent_time=None):
+    def send_to_all(self, source_id, message_info, sent_time=None, corruption_info=None):
         """
         Sends a message from the source computer to all connected computers.
         
@@ -73,10 +83,11 @@ class Communication:
             source_id (int): The ID of the source computer sending the message.
             message_info (str): The content of the message being sent.
             sent_time (float, optional): The time at which the message was sent. If None, defaults to 0.
+            corruption_info (dict, optional): The corruption information of the message being sent.
         """
         source_computer = self.network.network_dict.get(source_id)
         for index, connected_computer_id in enumerate(source_computer.connectedEdges):
-            self.send_message(source_id, connected_computer_id, message_info, sent_time)
+            self.send_message(source_id, connected_computer_id, message_info, sent_time, corruption_info)
 
     def receive_message(self, message: Message, comm):
         """

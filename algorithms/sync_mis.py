@@ -16,7 +16,7 @@ def init(self: computer.Computer, communication: Communication):
     self.state = NodeState.ACTIVE
 
 
-def mainAlgorithm(self: computer.Computer, communication: Communication, round, messages: list[Message] = None):
+def mainAlgorithm(self: computer.Computer, communication: Communication, round, messages = None):
     step = round % 3  # 0: send priority, 1: receive priorities, 2: receive IN_MIS
 
     if self.state == NodeState.TERMINATED:
@@ -33,7 +33,7 @@ def mainAlgorithm(self: computer.Computer, communication: Communication, round, 
         if self.state == NodeState.ACTIVE:
             highest = True
             for msg in messages:
-                parts = msg.content.split(" ")
+                parts = msg.split(" ")
                 if parts[0] == "PRIORITY":
                     neighbor_priority = float(parts[1])
                     if neighbor_priority > self.priority:
@@ -48,7 +48,7 @@ def mainAlgorithm(self: computer.Computer, communication: Communication, round, 
         # If neighbor is in MIS, deactivate
         if self.state == NodeState.ACTIVE:
             for msg in messages:
-                if msg.content == "IN_MIS":
+                if msg == "IN_MIS":
                     self.state = NodeState.TERMINATED
                     self.color = "gray"
                     break
