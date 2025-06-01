@@ -3,68 +3,53 @@ Error module for handling node failures and collapse conditions in the distribut
 
 This module defines the configuration and conditions for node failures/collapses in the network.
 """
-import random 
+import random
 import string
 import simulator.Constants as Constants
 from utils.logger_config import logger
-
-
-class NodeState:
-    """
-    Enumeration of possible node states.
-    Only these three states are allowed in the system.
-    """
-    ACTIVE = "active"      # Node is functioning normally
-    COLLAPSED = "collapsed"  # Node has failed/collapsed
-    TERMINATED = "terminated"  # Node has completed its algorithm
-
-    @staticmethod
-    def is_valid_state(state):
-        """
-        Check if a state is one of the valid system states.
-        
-        Args:
-            state (str): The state to check
-            
-        Returns:
-            bool: True if the state is valid, False otherwise
-        """
-        return state in {NodeState.ACTIVE, NodeState.COLLAPSED, NodeState.TERMINATED}
-    
+from simulator.config import NodeState
 
 class CollapseConfig:
     """
     Configuration class for node collapse conditions.
 
     Attributes:
-        round_number (int): Round number at which the node should collapse (for sync mode)
-        received_msg_count (int): Number of received messages after which node should collapse
-        sent_msg_count (int): Number of sent messages after which node should collapse
-        message_content (str): Specific message content that triggers collapse
-        node_ids (list): List of node IDs that should collapse
+        node_configs (dict): Dictionary mapping node IDs to their collapse configurations
+        Each node configuration contains:
+            - round_number (int): Round number at which the node should collapse
+            - round_reoccurence (int): How often the collapse should reoccur
+            - probability (float): Probability of collapse when conditions are met
+            - received_msg_count (int): Number of messages to receive before collapse
+            - sent_msg_count (int): Number of messages to send before collapse
     """
 
-    def __init__(self, 
-                 round_number=None, 
-                 received_msg_count=None, 
-                 sent_msg_count=None,
-                 message_content=None,
-                 node_ids=None):
+    def __init__(self, config_dict=None):
         """
         Initialize collapse configuration.
 
         Args:
-            round_number (int, optional): Round number for collapse
-            received_msg_count (int, optional): Message receive count for collapse
-            sent_msg_count (int, optional): Message send count for collapse
-            message_content (str, optional): Message content that triggers collapse
-            node_ids (list, optional): List of node IDs to collapse
+            config_dict (dict): Configuration dictionary from algorithm file
+            Format example:
+            {
+                "1": {"round": 2, "round_reoccurence": 1, "probability": 1},
+                "2": {"round": 3, "received_msg_count": 5},
+                "3": {"sent_msg_count": 3, "probability": 0.5}
+            }
         """
-        self.round_number = round_number
-        self.received_msg_count = received_msg_count
-        self.sent_msg_count = sent_msg_count
-        self.message_content = message_content
-        self.node_ids = node_ids if node_ids else []
+        self.node_configs = {}
+
+        if config_dict is not None:
+            # Process each node's configuration
+            for node_id, node_config in config_dict.items():
+                if node_id.isdigit():
+                    node_id = int(node_id)
+                    self.node_configs[node_id] = {
+                        'round': node_config.get('round'),
+                        'round_reoccurence': node_config.get('round_reoccurence', 1),
+                        'probability': node_config.get('probability', 1.0),
+                        'received_msg_count': node_config.get('received_msg_count'),
+                        'sent_msg_count': node_config.get('sent_msg_count')
+                    }
 
     def should_collapse(self, computer, current_round=None, message=None):
         """
@@ -78,41 +63,98 @@ class CollapseConfig:
         Returns:
             bool: True if the computer should collapse, False otherwise
         """
-        # Check if computer ID is in the list of nodes to collapse
-        if self.node_ids and computer.id in self.node_ids:
-            return True
+        logger.debug(f"checking collapse, computer: {computer.id}, current_round: {current_round}, message: {message}")
+        # quick check if node active just make sure computer is not none and has state
+        if computer is None:
+            return
 
-        # Check round number (for sync mode)
-        if self.round_number is not None and current_round == self.round_number:
-            return True
+        if not hasattr(computer, 'state') or computer.state != NodeState.ACTIVE:
+            logger.debug(f"computer {computer.id} is not active, skipping collapse check")
+            return
+
+
+
+
+        # Quick check if this node has a collapse configuration
+        node_config = self.node_configs.get(computer.id)
+        if not node_config:
+            return
+
+            # Apply probability check
+        if random.random() > node_config['probability']:
+            return
+
+            # Check round number (for sync mode)
+        if current_round is not None and node_config['round'] is not None:
+            if node_config['round_reoccurence']:
+                # Check if we're at a round where collapse should occur
+                if (current_round >= node_config['round'] and
+                        (current_round - node_config['round']) % node_config['round_reoccurence'] == 0):
+                    computer.collapse()
+                    return
+            elif current_round == node_config['round']:
+                computer.collapse()
+                return
 
         # Check received message count
-        if (self.received_msg_count is not None and 
-            hasattr(computer, 'received_msg_count') and 
-            computer.received_msg_count >= self.received_msg_count):
-            return True
+        if (node_config['received_msg_count'] is not None and
+                hasattr(computer, 'received_msg_count') and
+                computer.received_msg_count >= node_config['received_msg_count']):
+            computer.collapse()
+            return
 
         # Check sent message count
-        if (self.sent_msg_count is not None and 
-            hasattr(computer, 'sent_msg_count') and 
-            computer.sent_msg_count >= self.sent_msg_count):
-            return True
+        if (node_config['sent_msg_count'] is not None and
+                hasattr(computer, 'sent_msg_count') and
+                computer.sent_msg_count >= node_config['sent_msg_count']):
+            computer.collapse()
+            return
 
-        # Check message content
-        if (self.message_content is not None and 
-            message is not None and 
-            str(message.content) == self.message_content):
-            return True
+        return
 
-        return False
-    
+    def get_node_config(self, node_id):
+        """
+        Get the collapse configuration for a specific node.
+
+        Args:
+            node_id (int): The ID of the node
+
+        Returns:
+            dict: The node's collapse configuration or None if not found
+        """
+        return self.node_configs.get(node_id)
+
+    def add_node_config(self, node_id, round_number=None, round_reoccurence=1,
+                        probability=1.0, received_msg_count=None, sent_msg_count=None):
+        """
+        Add or update a node's collapse configuration.
+
+        Args:
+            node_id (int): The ID of the node
+            round_number (int, optional): Round number for collapse
+            round_reoccurence (int, optional): How often the collapse should reoccur
+            probability (float, optional): Probability of collapse when conditions are met
+            received_msg_count (int, optional): Number of messages to receive before collapse
+            sent_msg_count (int, optional): Number of messages to send before collapse
+        """
+        self.node_configs[node_id] = {
+            'round': round_number,
+            'round_reoccurence': round_reoccurence,
+            'probability': probability,
+            'received_msg_count': received_msg_count,
+            'sent_msg_count': sent_msg_count
+        }
+
+    def __str__(self):
+        """String representation of the collapse configuration."""
+        return f"CollapseConfig(nodes={list(self.node_configs.keys())})"
 
 
 # function to get corruption info and the message content and do
 def corrupt_message(message_content, corruption_info):
     if corruption_info is None:
         return message_content
-    
+
     if corruption_info.get(Constants.RESERVED_PROBABILITY_OF_LOSS) is not None:
         # get random number between 0 and 1
         random_number = random.random()
@@ -120,31 +162,28 @@ def corrupt_message(message_content, corruption_info):
             logger.debug(f"message lost: {message_content}")
             logger.info(f"message lost: {message_content}")
             return None
-        
-        
-    if corruption_info.get(Constants.RESERVED_PROBABILITY_OF_CORRUPTION) is not None:    
+
+    if corruption_info.get(Constants.RESERVED_PROBABILITY_OF_CORRUPTION) is not None:
         random_number = random.random()
         if random_number < corruption_info.get(Constants.RESERVED_PROBABILITY_OF_CORRUPTION):
             # balagan
             return corrupt_message_content(message_content, corruption_info.get("corruption"))
 
-        
-        
     return message_content
 
 
 def corrupt_message_content(message_content, corruption_info):
     if not isinstance(message_content, dict) or not isinstance(corruption_info, dict):
         return message_content
-        
+
     # Create a copy of the message content to modify
     corrupted_content = message_content.copy()
-    
+
     # Process each field in the corruption info
     for field, corruption_value in corruption_info.items():
         if field not in corrupted_content:
             continue
-            
+
         if isinstance(corruption_value, str) and corruption_value == "_RANDOM":
             # Handle random corruption
             original_value = corrupted_content[field]
@@ -162,8 +201,8 @@ def corrupt_message_content(message_content, corruption_info):
                     return original_value
                 index = random.randint(0, len(original_value) - 1)
                 char = random.choice(string.ascii_letters + string.digits)
-                return original_value[:index] + char + original_value[index+1:]
-            
+                return original_value[:index] + char + original_value[index + 1:]
+
 
             elif isinstance(original_value, bool):
                 # For booleans, flip the value
@@ -182,11 +221,4 @@ def corrupt_message_content(message_content, corruption_info):
     # print the original and the corrupted content
     logger.debug(f"original content: {message_content}\n corrupted content: {corrupted_content}")
 
-            
     return corrupted_content
-
-
-
-
-            
-

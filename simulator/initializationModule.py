@@ -17,6 +17,8 @@ from simulator.data_structures.custom_min_heap import CustomMinHeap
 from simulator.data_structures.custom_set import CustomSet
 from simulator.data_structures.custom_dict import CustomDict
 from utils.exceptions import *
+from simulator.errorModule import CollapseConfig
+
 
 class Initialization:
     """
@@ -53,6 +55,7 @@ class Initialization:
         self.message_queue = CustomDict() if network_variables['Sync'] == "Sync" else CustomMinHeap()
         self.node_values_change = []  # for graph display
         self.edges_delays = {}  # holds the delays of each edge in the network
+        self.collapse_config = None
         self.load_algorithms(self.algorithm_path)
 
         for comp in self.connected_computers:  # resets the changed flag
@@ -462,7 +465,7 @@ class Initialization:
 
     def load_algorithms(self, algorithm_module_path):
         """
-        Loads the network algorithms for each computer from the specified path.
+        Loads the network algorithms and collapse configuration for each computer from the specified path.
 
         Args:
             algorithm_module_path (str): The file path to the algorithm module.
@@ -477,6 +480,16 @@ class Initialization:
             sys.path.insert(0, directory)
 
             algorithm_module = importlib.import_module(base_file_name)
+            # print all algorithm module attributes
+            logger.debug(f"Algorithm module attributes: {dir(algorithm_module)}")
+
+            # Load collapse configuration if it exists
+            collapse_config = None
+            if hasattr(algorithm_module, 'collapse_config'):
+                collapse_config = getattr(algorithm_module, 'collapse_config')
+                logger.debug(f"Found collapse configuration in {base_file_name}: {collapse_config}")
+                self.collapse_config = CollapseConfig(collapse_config)
+            
             for comp in self.connected_computers:
                 comp.algorithm_file = algorithm_module
 

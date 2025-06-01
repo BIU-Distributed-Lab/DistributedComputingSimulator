@@ -8,6 +8,7 @@ import simulator.initializationModule as initializationModule
 import simulator.communication as communication
 from simulator.config import NodeState
 from utils.logger_config import logger
+from simulator.Constants import *
 
 def initiateRun(network: initializationModule.Initialization, comm: communication.Communication, sync: str):
     """
@@ -47,7 +48,11 @@ def async_run(network: initializationModule.Initialization, comm: communication.
     while not network.message_queue.empty():
         message = network.message_queue.pop()
         comm.receive_message(message, comm)
+        # comp = network.network_dict.get(message.dest_id)
+        # network.collapse_config.should_collapse(comp, message)
 
+    logger.info("************************************************************************************")
+    logger.info("Async run completed")  
 
 def sync_run(network: initializationModule.Initialization, comm: communication.Communication):
     """
@@ -73,7 +78,7 @@ def sync_run(network: initializationModule.Initialization, comm: communication.C
         all_terminated = len(network.connected_computers)
 
         for comp in network.connected_computers:
-            if comp.state == NodeState.TERMINATED:
+            if comp.state == NodeState.TERMINATED or comp.state == NodeState.COLLAPSED:
                 all_terminated -= 1
                 continue
 
@@ -83,8 +88,13 @@ def sync_run(network: initializationModule.Initialization, comm: communication.C
             network.message_queue.clear_key(comp.id)
             # we want to take only the content of each message and send as alist
             current_messages = [message.content for message in current_messages]
+            network.collapse_config.should_collapse(comp, current_round, current_messages)
             comm.run_algorithm(comp, 'mainAlgorithm', current_round, current_messages)
 
+
         current_round += 1
+        if current_round > NUMBER_OF_ROUNDS:
+            logger.info("Reached max number of rounds, stopping sync run")
+            break
 
     logger.info("sync run completed")

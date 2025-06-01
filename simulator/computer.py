@@ -34,6 +34,8 @@ class Computer:
         self.color = "olivedrab"
         self.inputs = {}
         self.outputs = {}
+        self.received_msg_count = 0
+        self.sent_msg_count = 0
 
     @property
     def state(self) -> NodeState:
@@ -68,7 +70,7 @@ class Computer:
             value (Any): The value to set the attribute to.
         """
         # Only set the flag if the attribute is not private
-        if not name.startswith('_') and getattr(self, name, None) != value and name != "algorithm_file" and name != "id" and name != "connectedEdges" and name != "delays":
+        if not name.startswith('_') and getattr(self, name, None) != value and name != "algorithm_file" and name != "id" and name != "connectedEdges" and name != "delays" and name != "received_msg_count" and name != "sent_msg_count":   
             self._has_changed = True
             # print the id and what is changing
             logger.info(f"Computer {self.id} is changing {name} to {value}")
@@ -106,3 +108,23 @@ class Computer:
             list of float: The delays associated with the connected edges.
         """
         return self.delays
+
+    def collapse(self):
+        """
+        Collapses the computer.
+        """
+        self.state = NodeState.COLLAPSED
+        logger.info(f"Computer {self.id} has collapsed")
+        
+
+    def update_received_msg_count(self, delta):
+        """
+        Updates the received message count for the computer.
+        """
+        self.received_msg_count += delta
+
+    def update_sent_msg_count(self, delta):
+        """
+        Updates the sent message count for the computer.
+        """
+        self.sent_msg_count += delta

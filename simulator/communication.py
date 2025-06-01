@@ -7,10 +7,11 @@ This module handles the sending and receiving of messages between computers in t
 import random
 from simulator.computer import Computer
 import simulator.initializationModule as initializationModule
+from simulator.config import NodeState
 from simulator.message import Message
 from utils.logger_config import logger
-TERMINATED_STATE = "terminated"
 import simulator.errorModule as errorModule
+
 
 class Communication:
     """
@@ -46,13 +47,13 @@ class Communication:
         # check if dest connected to source
         if dest not in self.network.network_dict.get(source).connectedEdges:
             return
-        
+
         current_computer = self.network.network_dict.get(source)
 
-        current_computer_terminated = current_computer.state == TERMINATED_STATE
-        dest_computer_terminated = self.network.network_dict.get(dest).state == TERMINATED_STATE
+        current_computer_active = current_computer.state == NodeState.ACTIVE
+        dest_computer_active = self.network.network_dict.get(dest).state == NodeState.ACTIVE
 
-        if not current_computer_terminated and not dest_computer_terminated:
+        if current_computer_active and dest_computer_active:
             # creating a new message which will be put into the queue
             if sent_time is None:
                 sent_time = 0
@@ -68,12 +69,15 @@ class Communication:
                 arrival_time=sent_time + delay,
                 content=message_info
             )
-            
 
             if corruption_info is not None:
                 message.content = errorModule.corrupt_message(message.content, corruption_info)
 
-            self.network.message_queue.push(message)
+            if message.content != None:
+                self.network.message_queue.push(message)
+                current_computer.update_sent_msg_count(1)
+                # Check collapse after sending the message
+                self.network.collapse_config.should_collapse(current_computer)
 
     def send_to_all(self, source_id, message_info, sent_time=None, corruption_info=None):
         """
@@ -101,6 +105,11 @@ class Communication:
             logger.info(message.to_dict())
 
         received_computer = self.network.network_dict.get(message.dest_id)
+
+        received_computer.update_received_msg_count(1)
+        # Check if the computer should collapse after receiving the message
+        self.network.collapse_config.should_collapse(received_computer, message)
+
         self.run_algorithm(received_computer, 'mainAlgorithm', message.arrival_time, message.content)
 
     def run_algorithm(self, comp: Computer, function_name: str, arrival_time=None, message_content=None):
