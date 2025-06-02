@@ -50,7 +50,6 @@ class Initialization:
             self.create_connected_computers()
             self.network_dict = {comp.id: comp for comp in self.connected_computers}
 
-
         # always
         self.message_queue = CustomDict() if network_variables['Sync'] == "Sync" else CustomMinHeap()
         self.node_values_change = []  # for graph display
@@ -62,7 +61,6 @@ class Initialization:
             comp.reset_flag()
 
         # self.delays_creation() # used for creating delays for edges, not used in current version
-
 
     def parse_topology_file(self, file_path, network_variables):
         """
@@ -130,7 +128,6 @@ class Initialization:
                         ids_inputs = line.split('],')
                         logger.debug(f"ID attributes: {ids_inputs}")
 
-
             logger.info(f"Topology file {file_path} parsed successfully.")
             logger.debug(f"IDs: {ids_set}")
             logger.debug(f"Number of computers: {num_computers}")
@@ -167,13 +164,12 @@ class Initialization:
                 attr_str = attr_str.strip('[]').split(',')
                 logger.debug(f"Inputs for ID {id}: {attr_str}")
                 if len(attr_str) > len(input_names):
-                    raise ParseTopologyFileError(f"Number of Inputs does not match the number of Input names on ID {id}")
+                    raise ParseTopologyFileError(
+                        f"Number of Inputs does not match the number of Input names on ID {id}")
 
                 for name, value in zip(input_names, attr_str):
                     self.network_dict[id].inputs[name.strip()] = value
                     logger.info(f"ID {id} has input {name.strip()} with value {value}")
-
-
 
             self.topologyType = 'Custom'
             self.id_type = 'Custom'
@@ -194,7 +190,6 @@ class Initialization:
         except Exception as e:
             logger.debug(f"Error parsing topology file: {e}")
             raise ParseTopologyFileError(f"Error parsing topology file, please check the file format and try again")
-
 
     def update_network_variables(self, network_variables_data):
         """
@@ -489,7 +484,7 @@ class Initialization:
                 collapse_config = getattr(algorithm_module, 'collapse_config')
                 logger.debug(f"Found collapse configuration in {base_file_name}: {collapse_config}")
                 self.collapse_config = CollapseConfig(collapse_config)
-            
+
             for comp in self.connected_computers:
                 comp.algorithm_file = algorithm_module
 

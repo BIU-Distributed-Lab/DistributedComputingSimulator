@@ -82,13 +82,16 @@ class CollapseConfig:
 
         target_collapse_count = int(total_nodes * self.overall_collapse_percent)
         remaining_to_collapse = target_collapse_count - len(self.collapsed_nodes)
-        logger.debug(f"Total nodes: {total_nodes}, Target collapse count: {target_collapse_count}, "
-                     f"Remaining to collapse: {remaining_to_collapse}")
+
         if remaining_to_collapse <= 0:
             return
 
+        logger.debug(f"Total nodes: {total_nodes}, Target collapse count: {target_collapse_count}, "
+                     f"Remaining to collapse: {remaining_to_collapse}")
+
         # Estimate how many to collapse this round (can use Poisson or a fixed small number)
-        dynamic_lambda = max(1, remaining_to_collapse / 10)  # Tuneable parameter
+        parameter = 10
+        dynamic_lambda = max(1, remaining_to_collapse / parameter) # Ensure at least 1 node is selected
         logger.debug(f"Dynamic lambda for collapse: {dynamic_lambda}")
         num_to_collapse = min(len(candidates), np.random.poisson(dynamic_lambda), remaining_to_collapse)
         logger.debug(f"Number of nodes to collapse this round: {num_to_collapse}")
