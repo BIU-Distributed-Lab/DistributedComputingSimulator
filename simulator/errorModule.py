@@ -5,9 +5,13 @@ This module defines the configuration and conditions for node failures/collapses
 """
 import random
 import string
+
+import numpy as np
+
 import simulator.Constants as Constants
 from utils.logger_config import logger
 from simulator.config import NodeState
+
 
 class CollapseConfig:
     """
@@ -37,10 +41,15 @@ class CollapseConfig:
             }
         """
         self.node_configs = {}
+        self.overall_collapse_percent = 0.0
+        self.collapsed_nodes = set()
 
         if config_dict is not None:
-            # Process each node's configuration
+            self.overall_collapse_percent = config_dict.get("overall", 0.0)
+
             for node_id, node_config in config_dict.items():
+                if node_id == "overall":
+                    continue
                 if node_id.isdigit():
                     node_id = int(node_id)
                     self.node_configs[node_id] = {
@@ -50,6 +59,47 @@ class CollapseConfig:
                         'received_msg_count': node_config.get('received_msg_count'),
                         'sent_msg_count': node_config.get('sent_msg_count')
                     }
+
+    def maybe_collapse_randomly(self, all_computers):
+        """
+        Randomly collapse a subset of active computers based on the overall percentage.
+
+        Args:
+            all_computers (dict): Dictionary of all Computer objects by ID
+        """
+        total_nodes = len(all_computers)
+        if total_nodes == 0 or self.overall_collapse_percent <= 0:
+            return
+
+        # Filter only active and not-yet-collapsed nodes
+        candidates = [
+            c for c in all_computers.values()
+            if hasattr(c, 'state') and c.state == NodeState.ACTIVE and c.id not in self.collapsed_nodes
+        ]
+
+        if not candidates:
+            return
+
+        target_collapse_count = int(total_nodes * self.overall_collapse_percent)
+        remaining_to_collapse = target_collapse_count - len(self.collapsed_nodes)
+        logger.debug(f"Total nodes: {total_nodes}, Target collapse count: {target_collapse_count}, "
+                     f"Remaining to collapse: {remaining_to_collapse}")
+        if remaining_to_collapse <= 0:
+            return
+
+        # Estimate how many to collapse this round (can use Poisson or a fixed small number)
+        dynamic_lambda = max(1, remaining_to_collapse / 10)  # Tuneable parameter
+        logger.debug(f"Dynamic lambda for collapse: {dynamic_lambda}")
+        num_to_collapse = min(len(candidates), np.random.poisson(dynamic_lambda), remaining_to_collapse)
+        logger.debug(f"Number of nodes to collapse this round: {num_to_collapse}")
+
+        # Randomly select and collapse
+        if num_to_collapse > 0:
+            selected = random.sample(candidates, num_to_collapse)
+            for comp in selected:
+                comp.collapse()
+                self.collapsed_nodes.add(comp.id)
+                logger.info(f"Node {comp.id} randomly collapsed (overall={self.overall_collapse_percent})")
 
     def should_collapse(self, computer, current_round=None, message=None):
         """
@@ -63,7 +113,7 @@ class CollapseConfig:
         Returns:
             bool: True if the computer should collapse, False otherwise
         """
-        logger.debug(f"checking collapse, computer: {computer.id}, current_round: {current_round}, message: {message}")
+        #logger.debug(f"checking collapse, computer: {computer.id}, current_round: {current_round}, message: {message}")
         # quick check if node active just make sure computer is not none and has state
         if computer is None:
             return
@@ -71,9 +121,6 @@ class CollapseConfig:
         if not hasattr(computer, 'state') or computer.state != NodeState.ACTIVE:
             logger.debug(f"computer {computer.id} is not active, skipping collapse check")
             return
-
-
-
 
         # Quick check if this node has a collapse configuration
         node_config = self.node_configs.get(computer.id)
@@ -90,27 +137,41 @@ class CollapseConfig:
                 # Check if we're at a round where collapse should occur
                 if (current_round >= node_config['round'] and
                         (current_round - node_config['round']) % node_config['round_reoccurence'] == 0):
-                    computer.collapse()
+                    self.collapse_node(computer)
                     return
             elif current_round == node_config['round']:
-                computer.collapse()
+                self.collapse_node(computer)
                 return
 
         # Check received message count
         if (node_config['received_msg_count'] is not None and
                 hasattr(computer, 'received_msg_count') and
                 computer.received_msg_count >= node_config['received_msg_count']):
-            computer.collapse()
+            self.collapse_node(computer)
             return
 
         # Check sent message count
         if (node_config['sent_msg_count'] is not None and
                 hasattr(computer, 'sent_msg_count') and
                 computer.sent_msg_count >= node_config['sent_msg_count']):
-            computer.collapse()
+            self.collapse_node(computer)
             return
 
         return
+
+    def collapse_node(self, computer):
+        """
+        Collapse a specific computer node.
+
+        Args:
+            computer: Computer object to collapse
+        """
+        if computer is None or not hasattr(computer, 'state'):
+            return
+
+        # Collapse the node and update its state
+        computer.collapse()
+        self.collapsed_nodes.add(computer.id)
 
     def get_node_config(self, node_id):
         """

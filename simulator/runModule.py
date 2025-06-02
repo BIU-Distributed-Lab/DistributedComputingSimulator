@@ -91,6 +91,8 @@ def sync_run(network: initializationModule.Initialization, comm: communication.C
             network.collapse_config.should_collapse(comp, current_round, current_messages)
             comm.run_algorithm(comp, 'mainAlgorithm', current_round, current_messages)
 
+        # randomly collapse:
+        network.collapse_config.maybe_collapse_randomly(network.network_dict)
 
         current_round += 1
         if current_round > NUMBER_OF_ROUNDS:

@@ -115,6 +115,7 @@ class Computer:
         """
         self.state = NodeState.COLLAPSED
         logger.info(f"Computer {self.id} has collapsed")
+        logger.debug(f"Computer {self.id} has collapsed")
         
 
     def update_received_msg_count(self, delta):
