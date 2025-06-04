@@ -26,6 +26,9 @@ def initiateRun(network: initializationModule.Initialization, comm: communicatio
     else:
         async_run(network, comm)
 
+    # Log the statistics after the run
+    log_statistics(network)
+
 
 def async_run(network: initializationModule.Initialization, comm: communication.Communication):
     """
@@ -100,3 +103,22 @@ def sync_run(network: initializationModule.Initialization, comm: communication.C
             break
 
     logger.info("sync run completed")
+
+
+
+def log_statistics(network: initializationModule.Initialization):
+    """
+    Logs the statistics of the network after the simulation run.
+
+    Args:
+        network (Initialization): The initialized network with connected computers.
+    """
+    logger.info("************************************************************************************")
+    logger.info("Network Statistics:")
+    logger.info("Total number of computers: %s", len(network.connected_computers))
+    #logger.info("Total number of messages sent: %s", network.message_queue.total_messages_sent)
+    #logger.info("Total number of messages received: %s", network.message_queue.total_messages_received)
+
+    network.collapse_config.log_collapse_statistics()
+    network.reorder_config.log_reorder_statistics()
+    logger.info("************************************************************************************")

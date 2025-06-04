@@ -52,24 +52,27 @@ class Communication:
             logger.info(f"Cannot send message from {source} to {dest} because they are not connected.")
             return
 
+        if sent_time is None:
+            sent_time = 0
+
         # get the delay of that edge if async
         if self.network.sync == 'Async':
             if self.network.delay_type == 'Random':
                 # generate a random delay between 0 and 1
                 edge_delay = random.uniform(0, 1)
-                logger.debug(f"Random edge delay from {source} to {dest} is {edge_delay}")
+                #logger.debug(f"Random edge delay from {source} to {dest} is {edge_delay}")
 
                 if self.network.reorder_config.is_edge_ordered(source, dest):
                     # so we can see sent time needs to be the max of the last arrival time and the current sent time
-                    if sent_time is None:
-                        sent_time = 0
-                    else:
-                        sent_time = max(sent_time, self.last_arrival_time.get((source, dest), 0))
+                    logger.debug(f"send_time before max check: {sent_time}")
+
+                    sent_time = max(sent_time, self.last_arrival_time.get((source, dest), 0))
 
                     # sent_time = self.last_arrival_time.get((source, dest), 0)
 
                 else:
-                    logger.debug(f"Edge {source} to {dest} is not ordered")
+                    #logger.debug(f"Edge {source} to {dest} is not ordered")
+                    pass
 
             else:
                 # get the delay of the edge
@@ -86,9 +89,6 @@ class Communication:
 
         if current_computer_active and dest_computer_active:
             # creating a new message which will be put into the queue
-            if sent_time is None:
-                sent_time = 0
-
             message = Message(
                 source_id=source,
                 dest_id=dest,
@@ -132,6 +132,10 @@ class Communication:
             logger.info(message.to_dict())
 
         received_computer = self.network.network_dict.get(message.dest_id)
+
+        if received_computer.state != NodeState.ACTIVE:
+            logger.info(f"Computer {received_computer.id} is not active, ignoring message.")
+            return
 
         received_computer.update_received_msg_count(1)
         # Check if the computer should collapse after receiving the message

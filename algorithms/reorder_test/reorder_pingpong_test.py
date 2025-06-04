@@ -8,12 +8,15 @@ from utils.logger_config import logger
 
 
 reorder_config = {
-
+    "(0,1)": 1,
 }
 
 
 collapse_config = {
-
+    "0": {
+        "received_msg_count": 2,
+        "probability": 1
+    }
 }
 
 

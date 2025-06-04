@@ -45,6 +45,9 @@ class CollapseConfig:
         self.estimated_rounds_number = 100
         self.collapsed_nodes = set()
 
+        # object to update each collapse, for the log at the end of the program
+        self.collapse_log = {}
+
         if config_dict is not None:
             self.overall_collapse_percent = config_dict.get("overall", 0.0)
             self.estimated_rounds_number = config_dict.get("rounds_number", 100)
@@ -56,7 +59,7 @@ class CollapseConfig:
                     node_id = int(node_id)
                     self.node_configs[node_id] = {
                         'round': node_config.get('round'),
-                        'round_reoccurence': node_config.get('round_reoccurence', 1),
+                        'round_reoccurrence': node_config.get('round_reoccurrence', 1),
                         'probability': node_config.get('probability', 1.0),
                         'received_msg_count': node_config.get('received_msg_count'),
                         'sent_msg_count': node_config.get('sent_msg_count')
@@ -102,7 +105,8 @@ class CollapseConfig:
         if num_to_collapse > 0:
             selected = random.sample(candidates, num_to_collapse)
             for comp in selected:
-                comp.collapse()
+                #comp.collapse()
+                self.collapse_node(comp)
                 self.collapsed_nodes.add(comp.id)
                 logger.info(f"Node {comp.id} randomly collapsed (overall={self.overall_collapse_percent})")
 
@@ -118,7 +122,7 @@ class CollapseConfig:
         Returns:
             bool: True if the computer should collapse, False otherwise
         """
-        #logger.debug(f"checking collapse, computer: {computer.id}, current_round: {current_round}, message: {message}")
+        #logger.debug(f"checking collapse, computer: {computer.id}, current_round: {current_round}, curr received msg: {getattr(computer, 'received_msg_count', 0)}, ")
         # quick check if node active just make sure computer is not none and has state
         if computer is None:
             return
@@ -164,7 +168,7 @@ class CollapseConfig:
 
         return
 
-    def collapse_node(self, computer):
+    def collapse_node(self, computer, round_number=None):
         """
         Collapse a specific computer node.
 
@@ -178,6 +182,14 @@ class CollapseConfig:
         computer.collapse()
         self.collapsed_nodes.add(computer.id)
 
+        # Log the collapse event, message received, and message sent, and if round is not None, include it
+        self.collapse_log[computer.id] = {
+            'round': round_number,
+            'received_msg_count': getattr(computer, 'received_msg_count', 0),
+            'sent_msg_count': getattr(computer, 'sent_msg_count', 0)
+        }
+
+
     def get_node_config(self, node_id):
         """
         Get the collapse configuration for a specific node.
@@ -190,30 +202,23 @@ class CollapseConfig:
         """
         return self.node_configs.get(node_id)
 
-    def add_node_config(self, node_id, round_number=None, round_reoccurence=1,
-                        probability=1.0, received_msg_count=None, sent_msg_count=None):
-        """
-        Add or update a node's collapse configuration.
-
-        Args:
-            node_id (int): The ID of the node
-            round_number (int, optional): Round number for collapse
-            round_reoccurence (int, optional): How often the collapse should reoccur
-            probability (float, optional): Probability of collapse when conditions are met
-            received_msg_count (int, optional): Number of messages to receive before collapse
-            sent_msg_count (int, optional): Number of messages to send before collapse
-        """
-        self.node_configs[node_id] = {
-            'round': round_number,
-            'round_reoccurence': round_reoccurence,
-            'probability': probability,
-            'received_msg_count': received_msg_count,
-            'sent_msg_count': sent_msg_count
-        }
-
     def __str__(self):
         """String representation of the collapse configuration."""
         return f"CollapseConfig(nodes={list(self.node_configs.keys())})"
+
+    # function to log at the end of the program the number of collapsed nodes and what time they collapsed
+    def log_collapse_statistics(self):
+        """
+        Log the collapsed nodes for debugging.
+        """
+        # iterate collapse log and print
+        if self.collapse_log:
+            logger.info("Collapse Config Class Log:\n")
+            for node_id, collapse_info in self.collapse_log.items():
+                round_info = f"at round {collapse_info['round']}" if collapse_info['round'] is not None else ""
+                logger.info(f"Node {node_id} collapsed {round_info}, "
+                            f"message received: {collapse_info['received_msg_count']} and "
+                            f"msg sent: {collapse_info['sent_msg_count']}")
 
 
 class ReorderConfig:
@@ -221,7 +226,7 @@ class ReorderConfig:
     Configuration class for message reordering conditions.
 
     Attributes:
-        Example format: {"(1,2)": 0.5, "(2,3)": 0.2}
+        unordered_edges (set): Set of unordered edges represented as tuples (min(source, dest), max(source, dest)).
     """
 
     def __init__(self, config_dict=None):
@@ -245,26 +250,35 @@ class ReorderConfig:
             return
 
         for edge, probability in config_dict.items():
+            # Normalize edge representation
+            source, dest = map(int, edge.strip("()").split(","))
+            normalized_edge = (min(source, dest), max(source, dest))
             if random.random() < probability:
-                self.unordered_edges.add(edge)
+                self.unordered_edges.add(normalized_edge)
 
     def is_edge_ordered(self, source, dest):
+        """
+        Check if the edge is ordered.
 
-        # check if the edge is in the set
-        edge = f"({source},{dest})"
-        if edge in self.unordered_edges:
-            return False
+        Args:
+            source (int): Source node ID
+            dest (int): Destination node ID
 
-        return True
+        Returns:
+            bool: True if the edge is ordered, False otherwise
+        """
+        # Normalize edge representation
+        normalized_edge = (min(source, dest), max(source, dest))
+        return normalized_edge not in self.unordered_edges
 
-    def log_unordered_edges(self):
+    def log_reorder_statistics(self):
         """
         Log the unordered edges for debugging.
         """
         if self.unordered_edges:
-            logger.debug(f"Unordered edges: {self.unordered_edges}")
+            logger.info(f"Unordered edges: {self.unordered_edges}")
         else:
-            logger.debug("No unordered edges configured.")
+            logger.info("No unordered edges configured.")
 
 
 # function to get corruption info and the message content and do
