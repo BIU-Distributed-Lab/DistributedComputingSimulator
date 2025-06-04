@@ -42,10 +42,12 @@ class CollapseConfig:
         """
         self.node_configs = {}
         self.overall_collapse_percent = 0.0
+        self.estimated_rounds_number = 100
         self.collapsed_nodes = set()
 
         if config_dict is not None:
             self.overall_collapse_percent = config_dict.get("overall", 0.0)
+            self.estimated_rounds_number = config_dict.get("rounds_number", 100)
 
             for node_id, node_config in config_dict.items():
                 if node_id == "overall":
@@ -90,8 +92,8 @@ class CollapseConfig:
                      f"Remaining to collapse: {remaining_to_collapse}")
 
         # Estimate how many to collapse this round (can use Poisson or a fixed small number)
-        parameter = 10
-        dynamic_lambda = max(1, remaining_to_collapse / parameter) # Ensure at least 1 node is selected
+        parameter = self.estimated_rounds_number
+        dynamic_lambda = max(1, remaining_to_collapse / parameter)  # Ensure at least 1 node is selected
         logger.debug(f"Dynamic lambda for collapse: {dynamic_lambda}")
         num_to_collapse = min(len(candidates), np.random.poisson(dynamic_lambda), remaining_to_collapse)
         logger.debug(f"Number of nodes to collapse this round: {num_to_collapse}")
@@ -212,6 +214,57 @@ class CollapseConfig:
     def __str__(self):
         """String representation of the collapse configuration."""
         return f"CollapseConfig(nodes={list(self.node_configs.keys())})"
+
+
+class ReorderConfig:
+    """
+    Configuration class for message reordering conditions.
+
+    Attributes:
+        Example format: {"(1,2)": 0.5, "(2,3)": 0.2}
+    """
+
+    def __init__(self, config_dict=None):
+        """
+        Initialize reorder configuration.
+
+        Args:
+            config_dict (dict): Configuration dictionary from algorithm file
+        """
+        self.unordered_edges = set()
+        self.roll_the_dice(config_dict)
+
+    def roll_the_dice(self, config_dict):
+        """
+        Roll the dice to determine which edges should be unordered.
+
+        Args:
+            config_dict (dict): Configuration dictionary with edges and their probabilities
+        """
+        if config_dict is None:
+            return
+
+        for edge, probability in config_dict.items():
+            if random.random() < probability:
+                self.unordered_edges.add(edge)
+
+    def is_edge_ordered(self, source, dest):
+
+        # check if the edge is in the set
+        edge = f"({source},{dest})"
+        if edge in self.unordered_edges:
+            return False
+
+        return True
+
+    def log_unordered_edges(self):
+        """
+        Log the unordered edges for debugging.
+        """
+        if self.unordered_edges:
+            logger.debug(f"Unordered edges: {self.unordered_edges}")
+        else:
+            logger.debug("No unordered edges configured.")
 
 
 # function to get corruption info and the message content and do

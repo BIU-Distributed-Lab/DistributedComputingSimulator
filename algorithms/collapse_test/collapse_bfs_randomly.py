@@ -10,6 +10,7 @@ colors = ["blue", "red", "green", "yellow", "purple", "pink", "orange", "cyan", 
 
 collapse_config = {
     "overall": 0.1,
+    "rounds_number": 10,
     "4": {
         "round": 2,
         "round_reoccurence": 1,

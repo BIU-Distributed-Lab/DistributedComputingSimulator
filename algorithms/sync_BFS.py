@@ -7,6 +7,9 @@ import numpy as np
 colors = ["blue", "red", "green", "yellow", "purple", "pink", "orange", "cyan", "magenta", "lime", "teal", "lavender",
           "brown", "maroon", "navy", "olive", "coral", "salmon", "gold", "silver"]
 
+collapse_config = {
+}
+
 
 def init(self: computer.Computer, communication: Communication):
     """

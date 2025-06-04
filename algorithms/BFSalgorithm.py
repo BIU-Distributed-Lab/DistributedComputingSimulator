@@ -17,6 +17,17 @@ colors = ["blue", "red", "green", "yellow", "purple", "pink", "orange", "cyan", 
           "brown", "maroon", "navy", "olive", "coral", "salmon", "gold", "silver"]
 
 
+reorder_messages = {
+    "(1,2)": 0.5,
+    "(2,3)": 0.2,
+}
+
+
+collapse_config = {
+
+}
+
+
 def mainAlgorithm(self: computer.Computer, communication: Communication, _arrival_time, message: str = None):
     message_parts = message.split(" ")
     dist = float(message_parts[-3])

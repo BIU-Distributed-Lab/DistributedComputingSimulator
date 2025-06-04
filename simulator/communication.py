@@ -11,6 +11,7 @@ from simulator.config import NodeState
 from simulator.message import Message
 from utils.logger_config import logger
 import simulator.errorModule as errorModule
+from simulator.errorModule import ReorderConfig
 
 
 class Communication:
@@ -29,6 +30,8 @@ class Communication:
             network (Initialization): The initialized network containing the computers.
         """
         self.network = network
+        # dict to hold the last time message sent for the async case for each edge, (source_id, dest_id) -> time
+        self.last_arrival_time = {}
 
     # Send a message from the source computer to the destination computer
     def send_message(self, source, dest, message_info, sent_time=None, corruption_info=None):
@@ -46,7 +49,35 @@ class Communication:
         """
         # check if dest connected to source
         if dest not in self.network.network_dict.get(source).connectedEdges:
+            logger.info(f"Cannot send message from {source} to {dest} because they are not connected.")
             return
+
+        # get the delay of that edge if async
+        if self.network.sync == 'Async':
+            if self.network.delay_type == 'Random':
+                # generate a random delay between 0 and 1
+                edge_delay = random.uniform(0, 1)
+                logger.debug(f"Random edge delay from {source} to {dest} is {edge_delay}")
+
+                if self.network.reorder_config.is_edge_ordered(source, dest):
+                    # so we can see sent time needs to be the max of the last arrival time and the current sent time
+                    if sent_time is None:
+                        sent_time = 0
+                    else:
+                        sent_time = max(sent_time, self.last_arrival_time.get((source, dest), 0))
+
+                    # sent_time = self.last_arrival_time.get((source, dest), 0)
+
+                else:
+                    logger.debug(f"Edge {source} to {dest} is not ordered")
+
+            else:
+                # get the delay of the edge
+                edge_delay = self.network.get_edge_delay(source, dest)
+                logger.debug(f"Edge delay from {source} to {dest} is {edge_delay}")
+        else:
+            # in sync, we want to use a constant delay of 1 round
+            edge_delay = 1
 
         current_computer = self.network.network_dict.get(source)
 
@@ -58,26 +89,22 @@ class Communication:
             if sent_time is None:
                 sent_time = 0
 
-            if self.network.delay_type == 'Random':
-                delay = random.random()
-            elif self.network.delay_type == 'Constant':
-                delay = 1
-
             message = Message(
                 source_id=source,
                 dest_id=dest,
-                arrival_time=sent_time + delay,
+                arrival_time=sent_time + edge_delay,
                 content=message_info
             )
 
             if corruption_info is not None:
                 message.content = errorModule.corrupt_message(message.content, corruption_info)
 
-            if message.content != None:
+            if message.content is not None:
                 self.network.message_queue.push(message)
                 current_computer.update_sent_msg_count(1)
                 # Check collapse after sending the message
                 self.network.collapse_config.should_collapse(current_computer)
+                self.last_arrival_time[(source, dest)] = sent_time + edge_delay
 
     def send_to_all(self, source_id, message_info, sent_time=None, corruption_info=None):
         """

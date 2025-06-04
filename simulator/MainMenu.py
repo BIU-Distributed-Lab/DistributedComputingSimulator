@@ -19,7 +19,7 @@ COMBOBOX_OPTIONS = {
     "Sync": "Sync, Async",
     "Topology": "Random, Clique, Line, Tree, Star, Custom",
     "ID Type": "Random, Sequential, Custom",
-    "Delay": "Random, Constant",
+    "Delay": "Constant, Random Constant, Random",
     "Display": "Text, Graph",
     "Root": "No Root, Min ID, Random, Custom",
     "Logging": "Short, Medium, Long",

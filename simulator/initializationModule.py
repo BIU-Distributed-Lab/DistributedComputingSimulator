@@ -17,7 +17,7 @@ from simulator.data_structures.custom_min_heap import CustomMinHeap
 from simulator.data_structures.custom_set import CustomSet
 from simulator.data_structures.custom_dict import CustomDict
 from utils.exceptions import *
-from simulator.errorModule import CollapseConfig
+from simulator.errorModule import CollapseConfig, ReorderConfig
 
 
 class Initialization:
@@ -55,12 +55,16 @@ class Initialization:
         self.node_values_change = []  # for graph display
         self.edges_delays = {}  # holds the delays of each edge in the network
         self.collapse_config = None
+        self.reorder_config = None
         self.load_algorithms(self.algorithm_path)
 
         for comp in self.connected_computers:  # resets the changed flag
             comp.reset_flag()
 
-        # self.delays_creation() # used for creating delays for edges, not used in current version
+
+        # if async create delays for edges
+        if network_variables['Sync'] == "Async":
+            self.delays_creation() # used for creating delays for edges, not used in current version
 
     def parse_topology_file(self, file_path, network_variables):
         """
@@ -231,9 +235,12 @@ class Initialization:
         return "\n".join(result)
 
     # used for creating delays for edges, not used in current version     
-    """ def delays_creation(self):
+    def delays_creation(self):
+        if self.delay_type == "Random":
+            return
+
         delay_functions = {
-        "Random": self.random_delay,
+        "Random Constant": self.random_delay,
         "Constant": self.constant_delay,
         }
         id_function = delay_functions[self.delay_type]
@@ -251,6 +258,8 @@ class Initialization:
                     self.edges_delays[edge_tuple] = random_num
                 
                 comp.delays[i] = self.edges_delays[edge_tuple]
+
+        logger.debug(f"Edges delays: {self.edges_delays}")
                 
     # Creates constant delay for every edge
     def constant_delay(self):
@@ -260,9 +269,25 @@ class Initialization:
                 edge_tuple = (comp.id, connected) if comp.id < connected else (connected, comp.id) # unique representation of the edge as a tuple
                 
                 if edge_tuple not in self.edges_delays: # if not already in edgesDelays, generate a delay of 1 and insert into edgesDelays
-                    self.edges_delays[edge_tuple] =1
+                    self.edges_delays[edge_tuple] = 1
                 
-                comp.delays[i] = self.edges_delays[edge_tuple] """
+                comp.delays[i] = self.edges_delays[edge_tuple]
+
+    # function to return the delay given the edge
+    def get_edge_delay(self, comp_id, connected_id):
+        """
+        Returns the delay for the edge between two computers.
+
+        Args:
+            comp_id (int): The ID of the first computer.
+            connected_id (int): The ID of the second computer.
+
+        Returns:
+            float: The delay for the edge between the two computers.
+        """
+        edge_tuple = (comp_id, connected_id) if comp_id < connected_id else (connected_id, comp_id)
+        return self.edges_delays.get(edge_tuple, None)
+
 
     def create_connected_computers(self):
         """
@@ -484,6 +509,11 @@ class Initialization:
                 collapse_config = getattr(algorithm_module, 'collapse_config')
                 logger.debug(f"Found collapse configuration in {base_file_name}: {collapse_config}")
                 self.collapse_config = CollapseConfig(collapse_config)
+
+            if hasattr(algorithm_module, 'reorder_config'):
+                reorder_messages = getattr(algorithm_module, 'reorder_config')
+                logger.debug(f"Found reorder messages in {base_file_name}: {reorder_messages}")
+                self.reorder_config = ReorderConfig(reorder_messages)
 
             for comp in self.connected_computers:
                 comp.algorithm_file = algorithm_module
