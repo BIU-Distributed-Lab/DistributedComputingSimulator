@@ -93,17 +93,15 @@ def runSimulator(network: initializationModule.Initialization, comm: communicati
         thread = threading.Thread(target=runModule.initiateRun, args=(network, comm, network_variables['Sync']))
         thread.start()
         thread.join()
-        logger.info("--- total simulation time : %s seconds ---" % (time.time() - start_time))
-        logger.info("Outputs:\n%s", [comp.outputs for comp in network.network_dict.values()])
         sys.exit(app.exec_())
     else:
         runModule.initiateRun(network, comm, network_variables['Sync'])
         algorithm_run_time = time.time() - start_time - net_creation_time
-        logger.info("--- Total Simulation Time : %s seconds ---" % (time.time() - start_time))
-        logger.info("--- Net Creation Time : %s seconds ---" % (net_creation_time))
-        logger.info("--- Algorithm Run Time : %s seconds ---" % (algorithm_run_time))
 
-        logger.info(" Outputs:\n%s", [comp.outputs for comp in network.network_dict.values()])
+    logger.info("--- Total Simulation Time : %s seconds ---" % (time.time() - start_time))
+    logger.info("--- Net Creation Time : %s seconds ---" % (net_creation_time))
+    logger.info("--- Algorithm Run Time : %s seconds ---" % (algorithm_run_time))
+
 
 
 if __name__ == "__main__":

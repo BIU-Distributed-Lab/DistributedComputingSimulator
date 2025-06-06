@@ -116,9 +116,9 @@ def log_statistics(network: initializationModule.Initialization):
     logger.info("************************************************************************************")
     logger.info("Network Statistics:")
     logger.info("Total number of computers: %s", len(network.connected_computers))
-    #logger.info("Total number of messages sent: %s", network.message_queue.total_messages_sent)
-    #logger.info("Total number of messages received: %s", network.message_queue.total_messages_received)
-
+    logger.info("Total number of messages sent: %s", network.message_queue.total_messages_sent)
+    logger.info("Total number of messages received: %s", network.message_queue.total_messages_received)
     network.collapse_config.log_collapse_statistics()
     network.reorder_config.log_reorder_statistics()
+    logger.info("Outputs:\n%s", [comp.outputs for comp in network.network_dict.values()])
     logger.info("************************************************************************************")

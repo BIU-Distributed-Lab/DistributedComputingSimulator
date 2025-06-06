@@ -14,6 +14,8 @@ class CustomDict:
         Initializes the custom dictionary.
         """
         self.dict = {}
+        self.total_messages_sent = 0
+        self.total_messages_received = 0
 
     def push(self, message: Message):
         """
@@ -29,6 +31,7 @@ class CustomDict:
         if key not in self.dict:
             self.dict[key] = []
         self.dict[key].append(message)
+        self.total_messages_sent += 1
 
     def remove(self, message: Message):
         """
@@ -93,6 +96,7 @@ class CustomDict:
             list[Message]: A list of messages for the specified destination ID and round.
         """
         key = (dest_id, current_round)
+        self.total_messages_received += len(self.dict.get(key, []))
         return self.dict.get(key, [])
 
     def clear_key(self, dest_id):

@@ -16,6 +16,8 @@ class CustomMinHeap:
         """
         self.heap = []
         self.counter = 0  # unique sequence count
+        self.total_messages_sent = 0
+        self.total_messages_received = 0
 
     def push(self, message: Message):
         """
@@ -26,6 +28,7 @@ class CustomMinHeap:
         """
         heapq.heappush(self.heap, (message.arrival_time, self.counter, message))
         self.counter += 1
+        self.total_messages_sent += 1
 
     def pop(self) -> Message:
         """
@@ -35,6 +38,7 @@ class CustomMinHeap:
             Message: The message with the smallest arrival time.
         """
         priority, priority2, message = heapq.heappop(self.heap)
+        self.total_messages_received += 1
         return message
 
     def empty(self) -> bool:

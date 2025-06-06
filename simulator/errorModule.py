@@ -220,6 +220,9 @@ class CollapseConfig:
                             f"message received: {collapse_info['received_msg_count']} and "
                             f"msg sent: {collapse_info['sent_msg_count']}")
 
+        else:
+            logger.info("No nodes collapsed during the simulation.")
+
 
 class ReorderConfig:
     """
