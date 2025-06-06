@@ -8,6 +8,12 @@ import simulator.Constants as Constants
 
 colors = ["blue", "red", "green", "yellow", "purple", "pink", "orange", "cyan", "magenta"]
 
+
+collapse_config = None # Placeholder for collapse configuration, if needed
+
+reorder_config = None  # Placeholder for reorder configuration, if needed
+
+
 def init(self: computer.Computer, communication: Communication):
     """
     Initialize the node's state before starting the synchronous rounds.

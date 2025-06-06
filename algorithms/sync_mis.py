@@ -5,6 +5,9 @@ from simulator.config import NodeState
 import numpy as np
 import random
 
+reorder_config = None  # Placeholder for reorder configuration, if needed
+
+collapse_config = None  # Placeholder for collapse configuration, if needed
 
 def init(self: computer.Computer, communication: Communication):
     """

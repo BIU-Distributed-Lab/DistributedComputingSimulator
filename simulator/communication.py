@@ -84,7 +84,7 @@ class Communication:
 
         current_computer = self.network.network_dict.get(source)
 
-        current_computer_active = current_computer.state == NodeState.ACTIVE
+        current_computer_active = current_computer.state != NodeState.COLLAPSED
         dest_computer_active = self.network.network_dict.get(dest).state == NodeState.ACTIVE
 
         if current_computer_active and dest_computer_active:

@@ -142,10 +142,10 @@ class CollapseConfig:
 
             # Check round number (for sync mode)
         if current_round is not None and node_config['round'] is not None:
-            if node_config['round_reoccurence']:
+            if node_config['round_reoccurrence']:
                 # Check if we're at a round where collapse should occur
                 if (current_round >= node_config['round'] and
-                        (current_round - node_config['round']) % node_config['round_reoccurence'] == 0):
+                        (current_round - node_config['round']) % node_config['round_reoccurrence'] == 0):
                     self.collapse_node(computer)
                     return
             elif current_round == node_config['round']:
@@ -213,7 +213,7 @@ class CollapseConfig:
         """
         # iterate collapse log and print
         if self.collapse_log:
-            logger.info("Collapse Config Class Log:\n")
+            logger.info("Collapse Config Class Log:")
             for node_id, collapse_info in self.collapse_log.items():
                 round_info = f"at round {collapse_info['round']}" if collapse_info['round'] is not None else ""
                 logger.info(f"Node {node_id} collapsed {round_info}, "

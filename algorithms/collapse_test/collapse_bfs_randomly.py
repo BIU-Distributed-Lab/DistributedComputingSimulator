@@ -7,15 +7,16 @@ import numpy as np
 colors = ["blue", "red", "green", "yellow", "purple", "pink", "orange", "cyan", "magenta", "lime", "teal", "lavender",
           "brown", "maroon", "navy", "olive", "coral", "salmon", "gold", "silver"]
 
+reorder_config = None  # Placeholder for reorder configuration, if needed
 
 collapse_config = {
     "overall": 0.1,
-    "rounds_number": 10,
-    "4": {
-        "round": 2,
-        "round_reoccurence": 1,
-        "probability": 1
-    }
+    "rounds_number": 4,
+    # "4": {
+    #     "round": 2,
+    #     "round_reoccurence": 1,
+    #     "probability": 1
+    # }
 }
 
 

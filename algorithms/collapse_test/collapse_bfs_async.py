@@ -13,6 +13,8 @@ collapse_config = {
     }
 }
 
+reorder_config = None  # Placeholder for reorder configuration, if needed
+
 colors = ["blue", "red", "green", "yellow", "purple", "pink", "orange", "cyan", "magenta", "lime", "teal", "lavender",
           "brown", "maroon", "navy", "olive", "coral", "salmon", "gold", "silver"]
 
