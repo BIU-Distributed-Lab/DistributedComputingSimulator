@@ -13,10 +13,7 @@ reorder_config = {
 
 
 collapse_config = {
-    "0": {
-        "received_msg_count": 2,
-        "probability": 1
-    }
+
 }
 
 

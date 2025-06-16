@@ -10,6 +10,8 @@ colors = ["blue", "red", "green", "yellow", "purple", "pink", "orange", "cyan", 
 collapse_config = {
 }
 
+reorder_config = None
+
 
 def init(self: computer.Computer, communication: Communication):
     """
@@ -19,14 +21,12 @@ def init(self: computer.Computer, communication: Communication):
         self.distance = 0
         self.parent = self.id
         self.color = colors[0]
-        self.state = NodeState.ACTIVE
     else:
         self.distance = np.inf
         self.parent = None
-        self.state = NodeState.ACTIVE
 
 
-def mainAlgorithm(self: computer.Computer, communication: Communication, round, messages = None):
+def mainAlgorithm(self: computer.Computer, communication: Communication, round, messages=None):
     if round == 0:
         # Send initial message if root
         if self.is_root:

@@ -174,6 +174,7 @@ class Initialization:
                 for name, value in zip(input_names, attr_str):
                     self.network_dict[id].inputs[name.strip()] = value
                     logger.info(f"ID {id} has input {name.strip()} with value {value}")
+                    logger.debug(f"ID {id} has input {name.strip()} with value {value}")
 
             self.topologyType = 'Custom'
             self.id_type = 'Custom'
