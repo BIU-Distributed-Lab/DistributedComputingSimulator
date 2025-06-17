@@ -118,6 +118,14 @@ class Computer:
         logger.info(f"Computer {self.id} has collapsed")
         logger.debug(f"Computer {self.id} has collapsed")
 
+    def terminate(self):
+        """
+        Terminates the computer.
+        """
+        self.state = NodeState.TERMINATED
+        logger.info(f"Computer {self.id} has terminated")
+        logger.debug(f"Computer {self.id} has terminated")
+
     def update_received_msg_count(self, delta):
         """
         Updates the received message count for the computer.
