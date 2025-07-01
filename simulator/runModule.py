@@ -9,6 +9,8 @@ import simulator.communication as communication
 from simulator.config import NodeState
 from utils.logger_config import logger
 from simulator.Constants import *
+import psutil
+import time
 
 def initiateRun(network: initializationModule.Initialization, comm: communication.Communication, sync: str):
     """
@@ -106,6 +108,7 @@ def sync_run(network: initializationModule.Initialization, comm: communication.C
 
 
 
+
 def log_statistics(network: initializationModule.Initialization):
     """
     Logs the statistics of the network after the simulation run.
@@ -115,10 +118,58 @@ def log_statistics(network: initializationModule.Initialization):
     """
     logger.info("************************************************************************************")
     logger.info("Network Statistics:")
-    logger.info("Total number of computers: %s", len(network.connected_computers))
-    logger.info("Total number of messages sent: %s", network.message_queue.total_messages_sent)
-    logger.info("Total number of messages received: %s", network.message_queue.total_messages_received)
+
+    # 1. Basic network statistics
+    logger.info("1. Basic Network Statistics:")
+    logger.info("   Total computers: %s", len(network.connected_computers))
+    # logger.info("   Real-time seconds elapsed: %s seconds", time.time() - network.start_time)
+
+    # 2. Message statistics
+    logger.info("\n2. Message Statistics:")
+    logger.info("   Total messages sent: %s", network.message_queue.total_messages_sent)
+    logger.info("   Total messages received: %s", network.message_queue.total_messages_received)
+    logger.info("   Messages lost: %s", network.message_queue.total_messages_sent - network.message_queue.total_messages_received)
+    logger.info("   Corrupted messages: %s", network.message_queue.corrupted_messages if hasattr(network.message_queue, 'corrupted_messages') else 0)
+
+    # 3. Node communication statistics
+    logger.info("\n3. Node Communication Statistics:")
+    total_nodes = len(network.connected_computers)
+    avg_messages_per_node = (network.message_queue.total_messages_sent + network.message_queue.total_messages_received) / (2 * total_nodes)
+    logger.info("   Average messages per node: %.2f", avg_messages_per_node)
+
+    # Get top 10 chatty nodes
+    node_stats = [(comp.id, comp.sent_msg_count + comp.received_msg_count) for comp in network.connected_computers]
+    node_stats.sort(key=lambda x: x[1], reverse=True)
+    logger.info("   Top 10 chatty nodes:")
+    for node_id, msg_count in node_stats[:10]:
+        logger.info("      Node %d: %d messages", node_id, msg_count)
+
+    # 4. Node collapse statistics
+    logger.info("\n4. Node Collapse Statistics:")
+    collapsed_nodes = [comp for comp in network.connected_computers if comp.state == NodeState.COLLAPSED]
+    collapse_percentage = (len(collapsed_nodes) / total_nodes) * 100
+    logger.info("   Number of collapsed nodes: %d (%.2f%%)", len(collapsed_nodes), collapse_percentage)
+    if collapsed_nodes:
+        logger.info("   IDs of collapsed nodes: %s", [node.id for node in collapsed_nodes])
+        if hasattr(network.collapse_config, 'collapse_log'):
+            collapse_times = [info['round'] for info in network.collapse_config.collapse_log.values() if info['round'] is not None]
+            if collapse_times:
+                logger.info("   First collapse time: %d", min(collapse_times))
+                logger.info("   Last collapse time: %d", max(collapse_times))
+
+    # 5. System resource statistics
+    logger.info("\n5. System Resource Statistics:")
+    process = psutil.Process()
+    memory_info = process.memory_info()
+    logger.info("   Peak memory consumption: %.2f MB", memory_info.peak_wset / (1024 * 1024))
+    try:
+        cpu_percent = process.cpu_percent(interval=1.0)
+        logger.info("   Average CPU utilization: %.2f%%", cpu_percent)
+    except:
+        logger.info("   CPU utilization: Not measurable")
+
+    # Log existing statistics
     network.collapse_config.log_collapse_statistics()
     network.reorder_config.log_reorder_statistics()
-    logger.info("Outputs:\n%s", [comp.outputs for comp in network.network_dict.values()])
+    logger.info("\nOutputs:\n%s", [comp.outputs for comp in network.network_dict.values()])
     logger.info("************************************************************************************")
