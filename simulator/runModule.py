@@ -9,6 +9,7 @@ import simulator.communication as communication
 from simulator.config import NodeState
 from utils.logger_config import logger
 from simulator.Constants import *
+from simulator.errorModule import log_all_error_statistics
 import psutil
 import time
 
@@ -120,19 +121,19 @@ def log_statistics(network: initializationModule.Initialization):
     logger.info("Network Statistics:")
 
     # 1. Basic network statistics
-    logger.info("1. Basic Network Statistics:")
+    logger.info("\n\nBasic Network Statistics:\n")
     logger.info("   Total computers: %s", len(network.connected_computers))
     # logger.info("   Real-time seconds elapsed: %s seconds", time.time() - network.start_time)
 
     # 2. Message statistics
-    logger.info("\n2. Message Statistics:")
+    logger.info("\n\nMessage Statistics:\n")
     logger.info("   Total messages sent: %s", network.message_queue.total_messages_sent)
     logger.info("   Total messages received: %s", network.message_queue.total_messages_received)
     logger.info("   Messages lost: %s", network.message_queue.total_messages_sent - network.message_queue.total_messages_received)
     logger.info("   Corrupted messages: %s", network.message_queue.corrupted_messages if hasattr(network.message_queue, 'corrupted_messages') else 0)
 
     # 3. Node communication statistics
-    logger.info("\n3. Node Communication Statistics:")
+    logger.info("\n\nNode Communication Statistics:\n")
     total_nodes = len(network.connected_computers)
     avg_messages_per_node = (network.message_queue.total_messages_sent + network.message_queue.total_messages_received) / (2 * total_nodes)
     logger.info("   Average messages per node: %.2f", avg_messages_per_node)
@@ -145,20 +146,20 @@ def log_statistics(network: initializationModule.Initialization):
         logger.info("      Node %d: %d messages", node_id, msg_count)
 
     # 4. Node collapse statistics
-    logger.info("\n4. Node Collapse Statistics:")
-    collapsed_nodes = [comp for comp in network.connected_computers if comp.state == NodeState.COLLAPSED]
-    collapse_percentage = (len(collapsed_nodes) / total_nodes) * 100
-    logger.info("   Number of collapsed nodes: %d (%.2f%%)", len(collapsed_nodes), collapse_percentage)
-    if collapsed_nodes:
-        logger.info("   IDs of collapsed nodes: %s", [node.id for node in collapsed_nodes])
-        if hasattr(network.collapse_config, 'collapse_log'):
-            collapse_times = [info['round'] for info in network.collapse_config.collapse_log.values() if info['round'] is not None]
-            if collapse_times:
-                logger.info("   First collapse time: %d", min(collapse_times))
-                logger.info("   Last collapse time: %d", max(collapse_times))
+    # logger.info("\n4. Node Collapse Statistics:")
+    # collapsed_nodes = [comp for comp in network.connected_computers if comp.state == NodeState.COLLAPSED]
+    # collapse_percentage = (len(collapsed_nodes) / total_nodes) * 100
+    # logger.info("   Number of collapsed nodes: %d (%.2f%%)", len(collapsed_nodes), collapse_percentage)
+    # if collapsed_nodes:
+    #     logger.info("   IDs of collapsed nodes: %s", [node.id for node in collapsed_nodes])
+    #     if hasattr(network.collapse_config, 'collapse_log'):
+    #         collapse_times = [info['round'] for info in network.collapse_config.collapse_log.values() if info['round'] is not None]
+    #         if collapse_times:
+    #             logger.info("   First collapse time: %d", min(collapse_times))
+    #             logger.info("   Last collapse time: %d", max(collapse_times))
 
     # 5. System resource statistics
-    logger.info("\n5. System Resource Statistics:")
+    logger.info("\n\nSystem Resource Statistics:\n")
     process = psutil.Process()
     memory_info = process.memory_info()
     logger.info("   Peak memory consumption: %.2f MB", memory_info.peak_wset / (1024 * 1024))
@@ -169,7 +170,10 @@ def log_statistics(network: initializationModule.Initialization):
         logger.info("   CPU utilization: Not measurable")
 
     # Log existing statistics
+    logger.info("\n\nError Module Statistics:\n")
     network.collapse_config.log_collapse_statistics()
     network.reorder_config.log_reorder_statistics()
+    log_all_error_statistics()
+    logger.info("\nEnd of Error Module Statistics\n")
     logger.info("\nOutputs:\n%s", [comp.outputs for comp in network.network_dict.values()])
     logger.info("************************************************************************************")

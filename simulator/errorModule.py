@@ -212,6 +212,7 @@ class CollapseConfig:
         Log the collapsed nodes for debugging.
         """
         # iterate collapse log and print
+        logger.info("=== ERROR MODULE COLLAPSE STATISTICS ===")
         if self.collapse_log:
             logger.info("Collapse Config Class Log:")
             for node_id, collapse_info in self.collapse_log.items():
@@ -222,6 +223,8 @@ class CollapseConfig:
 
         else:
             logger.info("No nodes collapsed during the simulation.")
+
+        logger.info("=== END OF ERROR MODULE COLLAPSE STATISTICS ===")
 
 
 class ReorderConfig:
@@ -278,30 +281,191 @@ class ReorderConfig:
         """
         Log the unordered edges for debugging.
         """
+        logger.info("=== ERROR MODULE REORDER STATISTICS ===")
         if self.unordered_edges:
             logger.info(f"Unordered edges: {self.unordered_edges}")
         else:
             logger.info("No unordered edges configured.")
+        logger.info("=== END OF ERROR MODULE REORDER STATISTICS ===")
+
+class MessageCorruptionStats:
+    """
+    Statistics tracking class for message corruption operations.
+    
+    Tracks various metrics about message corruption including:
+    - Total messages processed
+    - Messages lost
+    - Messages corrupted by type
+    - Field-specific corruption statistics
+    """
+    
+    def __init__(self):
+        """Initialize corruption statistics tracking."""
+        self.total_messages_processed = 0
+        self.messages_lost = 0
+        self.messages_corrupted = 0
+        self.corruption_by_type = {
+            'int': 0,
+            'float': 0,
+            'str': 0,
+            'bool': 0,
+            'list': 0,
+            'direct_replacement': 0
+        }
+        self.corruption_by_field = {}
+        self.loss_attempts = 0
+        self.corruption_attempts = 0
+        self.corruption_log = []
+        
+    def record_message_processed(self):
+        """Record that a message was processed."""
+        self.total_messages_processed += 1
+        
+    def record_message_lost(self, message_content, probability):
+        """Record that a message was lost."""
+        self.messages_lost += 1
+        self.loss_attempts += 1
+        self.corruption_log.append({
+            'type': 'loss',
+            'message': str(message_content),
+            'probability': probability,
+            'timestamp': self.total_messages_processed
+        })
+        
+    def record_loss_attempt(self):
+        """Record that a message loss was attempted but didn't occur."""
+        self.loss_attempts += 1
+        
+    def record_message_corrupted(self, original_content, corrupted_content, corruption_info):
+        """Record that a message was corrupted."""
+        self.messages_corrupted += 1
+        self.corruption_attempts += 1
+        self.corruption_log.append({
+            'type': 'corruption',
+            'original': str(original_content),
+            'corrupted': str(corrupted_content),
+            'corruption_info': str(corruption_info),
+            'timestamp': self.total_messages_processed
+        })
+        
+    def record_corruption_attempt(self):
+        """Record that a message corruption was attempted but didn't occur."""
+        self.corruption_attempts += 1
+        
+    def record_field_corruption(self, field_name, corruption_type, original_value, corrupted_value):
+        """Record corruption of a specific field."""
+        if field_name not in self.corruption_by_field:
+            self.corruption_by_field[field_name] = {
+                'count': 0,
+                'types': {},
+                'examples': []
+            }
+            
+        self.corruption_by_field[field_name]['count'] += 1
+        
+        if corruption_type not in self.corruption_by_field[field_name]['types']:
+            self.corruption_by_field[field_name]['types'][corruption_type] = 0
+        self.corruption_by_field[field_name]['types'][corruption_type] += 1
+        
+        # Keep only last 5 examples to avoid memory issues
+        if len(self.corruption_by_field[field_name]['examples']) < 5:
+            self.corruption_by_field[field_name]['examples'].append({
+                'original': str(original_value),
+                'corrupted': str(corrupted_value),
+                'type': corruption_type
+            })
+            
+        self.corruption_by_type[corruption_type] += 1
+        
+    def log_corruption_statistics(self):
+        """Log comprehensive corruption statistics."""
+        logger.info("Message Corruption Statistics:")
+        logger.info(f"Total messages processed: {self.total_messages_processed}")
+        logger.info(f"Messages lost: {self.messages_lost} (attempts: {self.loss_attempts})")
+        logger.info(f"Messages corrupted: {self.messages_corrupted} (attempts: {self.corruption_attempts})")
+        
+        if self.total_messages_processed > 0:
+            loss_rate = (self.messages_lost / self.total_messages_processed) * 100
+            corruption_rate = (self.messages_corrupted / self.total_messages_processed) * 100
+            logger.info(f"Loss rate: {loss_rate:.2f}%")
+            logger.info(f"Corruption rate: {corruption_rate:.2f}%")
+            
+        # Log corruption by type
+        if any(count > 0 for count in self.corruption_by_type.values()):
+            logger.info("Corruption by data type:")
+            for data_type, count in self.corruption_by_type.items():
+                if count > 0:
+                    logger.info(f"  {data_type}: {count}")
+                    
+        # Log corruption by field
+        if self.corruption_by_field:
+            logger.info("Corruption by field:")
+            for field_name, field_stats in self.corruption_by_field.items():
+                logger.info(f"  {field_name}: {field_stats['count']} corruptions")
+                for corruption_type, type_count in field_stats['types'].items():
+                    logger.info(f"    {corruption_type}: {type_count}")
+                    
+        # Log recent corruption events (last 10)
+        if self.corruption_log:
+            logger.info("Recent corruption events:")
+            recent_events = self.corruption_log[-10:] if len(self.corruption_log) > 10 else self.corruption_log
+            for event in recent_events:
+                if event['type'] == 'loss':
+                    logger.info(f"  [Loss] Message: {event['message'][:50]}... (p={event['probability']})")
+                else:
+                    logger.info(f"  [Corruption] Original: {event['original'][:30]}... -> Corrupted: {event['corrupted'][:30]}...")
+                    
+    def get_statistics_summary(self):
+        """Get a summary of corruption statistics as a dictionary."""
+        return {
+            'total_processed': self.total_messages_processed,
+            'messages_lost': self.messages_lost,
+            'messages_corrupted': self.messages_corrupted,
+            'loss_attempts': self.loss_attempts,
+            'corruption_attempts': self.corruption_attempts,
+            'loss_rate': (self.messages_lost / self.total_messages_processed * 100) if self.total_messages_processed > 0 else 0,
+            'corruption_rate': (self.messages_corrupted / self.total_messages_processed * 100) if self.total_messages_processed > 0 else 0,
+            'corruption_by_type': self.corruption_by_type.copy(),
+            'corruption_by_field': {k: v['count'] for k, v in self.corruption_by_field.items()}
+        }
+
+
+# Global instance for tracking corruption statistics
+corruption_stats = MessageCorruptionStats()
 
 
 # function to get corruption info and the message content and do
 def corrupt_message(message_content, corruption_info):
+    # Record that we're processing a message
+    corruption_stats.record_message_processed()
+    
     if corruption_info is None:
         return message_content
 
     if corruption_info.get(Constants.RESERVED_PROBABILITY_OF_LOSS) is not None:
         # get random number between 0 and 1
         random_number = random.random()
-        if random_number < corruption_info.get(Constants.RESERVED_PROBABILITY_OF_LOSS):
+        loss_probability = corruption_info.get(Constants.RESERVED_PROBABILITY_OF_LOSS)
+        if random_number < loss_probability:
             logger.debug(f"message lost: {message_content}")
             logger.info(f"message lost: {message_content}")
+            corruption_stats.record_message_lost(message_content, loss_probability)
             return None
+        else:
+            corruption_stats.record_loss_attempt()
 
     if corruption_info.get(Constants.RESERVED_PROBABILITY_OF_CORRUPTION) is not None:
         random_number = random.random()
-        if random_number < corruption_info.get(Constants.RESERVED_PROBABILITY_OF_CORRUPTION):
+        corruption_probability = corruption_info.get(Constants.RESERVED_PROBABILITY_OF_CORRUPTION)
+        if random_number < corruption_probability:
             # balagan
-            return corrupt_message_content(message_content, corruption_info.get("corruption"))
+            original_content = message_content
+            corrupted_content = corrupt_message_content(message_content, corruption_info.get("corruption"))
+            if corrupted_content != original_content:
+                corruption_stats.record_message_corrupted(original_content, corrupted_content, corruption_info.get("corruption"))
+            return corrupted_content
+        else:
+            corruption_stats.record_corruption_attempt()
 
     return message_content
 
@@ -318,41 +482,76 @@ def corrupt_message_content(message_content, corruption_info):
         if field not in corrupted_content:
             continue
 
+        original_value = corrupted_content[field]
+
         if isinstance(corruption_value, str) and corruption_value == "_RANDOM":
             # Handle random corruption
-            original_value = corrupted_content[field]
             if isinstance(original_value, (int, float)):
                 # For numbers, add random offset
                 # generate random bit between 0 to the size of the number and flip it
                 bit_to_flip = random.randint(0, len(str(original_value)))
                 # flip the bit
                 corrupted_content[field] = original_value ^ (1 << bit_to_flip)
-
+                corruption_stats.record_field_corruption(field, 'int' if isinstance(original_value, int) else 'float', 
+                                                       original_value, corrupted_content[field])
 
             elif isinstance(original_value, str):
                 # For strings, either reverse it or add corruption marker
                 if not original_value:
-                    return original_value
+                    continue
                 index = random.randint(0, len(original_value) - 1)
                 char = random.choice(string.ascii_letters + string.digits)
-                return original_value[:index] + char + original_value[index + 1:]
-
+                corrupted_content[field] = original_value[:index] + char + original_value[index + 1:]
+                corruption_stats.record_field_corruption(field, 'str', original_value, corrupted_content[field])
 
             elif isinstance(original_value, bool):
                 # For booleans, flip the value
                 corrupted_content[field] = not original_value
+                corruption_stats.record_field_corruption(field, 'bool', original_value, corrupted_content[field])
 
             elif isinstance(original_value, list):
                 # For lists, shuffle the elements
                 corrupted_list = original_value.copy()
                 random.shuffle(corrupted_list)
                 corrupted_content[field] = corrupted_list
+                corruption_stats.record_field_corruption(field, 'list', original_value, corrupted_content[field])
 
         else:
             # Direct value replacement
             corrupted_content[field] = corruption_value
+            corruption_stats.record_field_corruption(field, 'direct_replacement', original_value, corruption_value)
 
     # print the original and the corrupted content
     logger.debug(f"original content: {message_content}\n corrupted content: {corrupted_content}")
 
     return corrupted_content
+
+
+def log_all_error_statistics():
+    """
+    Convenience function to log all error module statistics.
+    Should be called at the end of simulation to get comprehensive error statistics.
+    """
+    logger.info("=== ERROR MODULE CORRUPT MESSAGES STATISTICS ===")
+    corruption_stats.log_corruption_statistics()
+    logger.info("=== END OF ERROR MODULE CORRUPT MESSAGES STATISTICS ===")
+
+def get_all_error_statistics():
+    """
+    Get all error statistics as a dictionary for analysis.
+    
+    Returns:
+        dict: Comprehensive error statistics
+    """
+    return {
+        'corruption_stats': corruption_stats.get_statistics_summary()
+    }
+
+
+def reset_error_statistics():
+    """
+    Reset all error statistics. Useful for running multiple simulations.
+    """
+    global corruption_stats
+    corruption_stats = MessageCorruptionStats()
+    logger.info("Error module statistics reset")
