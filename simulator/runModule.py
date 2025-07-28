@@ -92,6 +92,10 @@ def sync_run(network: initializationModule.Initialization, comm: communication.C
             current_messages = network.message_queue.get_messages_for_specific_dest(comp.id, current_round)
             #logger.info("Current messages for computer %s: %s", comp.id, current_messages)
             network.message_queue.clear_key(comp.id)
+
+            # Update received message count for each message
+            comp.update_received_msg_count(len(current_messages))
+
             # we want to take only the content of each message and send as alist
             current_messages = [message.content for message in current_messages]
             network.collapse_config.should_collapse(comp, current_round, current_messages)
