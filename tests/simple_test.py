@@ -4,7 +4,6 @@ import tempfile
 import shutil
 import pytest
 from simulator.config import NodeState
-from topologyFiles import *
 
 
 @pytest.fixture(autouse=True, scope="session")
