@@ -8,6 +8,7 @@ from utils.exceptions import *
 from utils.logger_config import logger
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+from PyQt5.QtCore import QTimer
 from utils.logger_config import logger
 import simulator.runModule as runModule
 import simulator.communication as communication
@@ -44,6 +45,7 @@ def initializeSimulator():
         tuple: A tuple containing the initialized network, communication instance, and the loaded network variables.
     """
     show_error = None
+    for_testing = True if 'pytest' in sys.modules else False
     while True:
         try:
             logger.debug("Loading network variables")
@@ -51,7 +53,12 @@ def initializeSimulator():
             exitButtonPressed = MainMenu.menu(network_variables, show_error)
 
             if exitButtonPressed:
-                sys.exit()
+                if for_testing:
+                    return None, None, None
+                else:
+                    sys.exit()
+
+
 
             network = initializationModule.Initialization(network_variables)
             if network.logging_type != "Short":
@@ -72,7 +79,7 @@ def initializeSimulator():
 
 
 def runSimulator(network: initializationModule.Initialization, comm: communication.Communication,
-                 network_variables: dict, start_time):
+                 network_variables: dict, start_time, for_testing=False):
     """
     Runs the simulator based on user-provided network configuration and algorithm.
     
@@ -86,14 +93,21 @@ def runSimulator(network: initializationModule.Initialization, comm: communicati
         None
     """
     net_creation_time = time.time() - start_time
+    algorithm_run_time = 0  # Initialize to avoid UnboundLocalError
 
     if network_variables['Display'] == "Graph":
         app = QApplication(sys.argv)
         graphVisualization.visualize_network(network, comm)
-        thread = threading.Thread(target=runModule.initiateRun, args=(network, comm, network_variables['Sync']))
-        thread.start()
-        thread.join()
-        sys.exit(app.exec_())
+        if for_testing:
+            # Run synchronously for testing control
+            runModule.initiateRun(network, comm, network_variables['Sync'])
+            QTimer.singleShot(0, app.quit)
+            app.exec_()  # Let GUI run
+        else:
+            thread = threading.Thread(target=runModule.initiateRun, args=(network, comm, network_variables['Sync']))
+            thread.start()
+            thread.join()
+            sys.exit(app.exec_())
     else:
         runModule.initiateRun(network, comm, network_variables['Sync'])
         algorithm_run_time = time.time() - start_time - net_creation_time
@@ -101,10 +115,8 @@ def runSimulator(network: initializationModule.Initialization, comm: communicati
     logger.info("--- Total Simulation Time : %s seconds ---" % (time.time() - start_time))
     logger.info("--- Net Creation Time : %s seconds ---" % (net_creation_time))
     logger.info("--- Algorithm Run Time : %s seconds ---" % (algorithm_run_time))
-
-
-
-if __name__ == "__main__":
+    
+def main(for_testing=False):
     """
     Main entry point for the simulator. Redirects standard output to a log file and runs the simulator.
     """
@@ -113,5 +125,13 @@ if __name__ == "__main__":
     logger.debug("check if print to console")
     start_time = time.time()
     network, comm, network_variables = initializeSimulator()
-    runSimulator(network, comm, network_variables, start_time)
+    runSimulator(network, comm, network_variables, start_time, for_testing)
+    
+    if for_testing:
+        return network, comm, network_variables
+
+
+if __name__ == "__main__":
+    main()
+
 #sdfsdfs

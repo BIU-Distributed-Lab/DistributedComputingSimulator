@@ -20,7 +20,7 @@ def test_simulation_sync_mode():
         # Create network variables configuration directly (no GUI)
         network_variables = {
             "Algorithm": "edgeCaseSyncAlg.py",
-            "Topology File": "tests/testTopology.txt",
+            "Topology File": "topologyFiles/testTopology.txt",
             "Topology": "Custom",
             "Root": "Custom",
             "ID Type": "Custom",
