@@ -1,8 +1,8 @@
+import numpy as np
 import simulator.computer as computer
 from simulator.communication import Communication
 from simulator.message import Message
 from simulator.config import NodeState
-import numpy as np
 import time
 
 colors = ["blue", "red", "green", "yellow", "purple", "pink", "orange", "cyan", "magenta", "lime", "teal", "lavender",
