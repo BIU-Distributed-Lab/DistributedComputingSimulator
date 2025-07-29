@@ -1,6 +1,10 @@
 import json
 import logging
 import os
+import pytest
+import tempfile
+import shutil
+from unittest.mock import patch
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import QApplication, QFileDialog, QPushButton
@@ -8,16 +12,10 @@ from pytestqt import qtbot
 
 from PyQt5.QtGui import QIcon
 
-
-def test_complete_gui_workflow_with_simulation(qtbot, caplog):
+@pytest.mark.gui
+def test_complete_gui_workflow_with_simulation(qtbot):
     """Complete test: clicks GUI buttons AND runs full simulation with graph window."""
     print("Testing complete GUI workflow with actual simulation")
-    
-    import tempfile
-    import shutil
-    from unittest.mock import patch
-    
-    caplog.set_level(logging.DEBUG)  # Set logging capture level to DEBUG for detailed output
     
     # Backup original network_variables.json if it exists
     original_vars_file = "network_variables.json"
