@@ -38,6 +38,7 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        PYTHONPATH=$(pwd) pytest tests/ -m "not gui" -v
-        # Run GUI tests with virtual display
-        xvfb-run -a PYTHONPATH=$(pwd) pytest tests/ -m "gui" -v
+        export PYTHONPATH=$(pwd)
+        echo -e "[tool:pytest]\nmarkers =\n    gui: marks tests as requiring GUI" > pytest.ini
+        pytest tests/ -m "not gui" -v
+        xvfb-run -a pytest tests/ -m "gui" -v
