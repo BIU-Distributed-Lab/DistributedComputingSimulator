@@ -41,7 +41,7 @@ def mainAlgorithm(self: computer.Computer, communication: Communication, round, 
                 "distance": self.distance,
                 "parent": self.id
             }
-            
+
 
             
             communication.send_to_all(self.id, message_content, round)

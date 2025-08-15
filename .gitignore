@@ -3,6 +3,8 @@ network_variables.json
 output.txt
 *.xml
 *.iml
+*.venv
+*.idea
 *.pyc
 *.cpython-312.pyc
 __pycache__/

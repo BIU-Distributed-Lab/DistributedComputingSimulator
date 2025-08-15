@@ -1,3 +1,6 @@
 PyQt5
 networkx
 numpy 
+psutil
+pytest
+pytest-qt

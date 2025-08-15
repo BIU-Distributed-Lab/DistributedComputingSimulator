@@ -92,7 +92,7 @@ class Communication:
             message = Message(
                 source_id=source,
                 dest_id=dest,
-                arrival_time=sent_time + edge_delay,
+                arrival_time=sent_time + edge_delay,#bug here
                 content=message_info
             )
 

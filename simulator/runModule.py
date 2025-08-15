@@ -11,6 +11,7 @@ from utils.logger_config import logger
 from simulator.Constants import *
 from simulator.errorModule import log_all_error_statistics
 import psutil
+import sys
 import time
 
 def initiateRun(network: initializationModule.Initialization, comm: communication.Communication, sync: str):
@@ -92,6 +93,10 @@ def sync_run(network: initializationModule.Initialization, comm: communication.C
             current_messages = network.message_queue.get_messages_for_specific_dest(comp.id, current_round)
             #logger.info("Current messages for computer %s: %s", comp.id, current_messages)
             network.message_queue.clear_key(comp.id)
+
+            # Update received message count for each message
+            comp.update_received_msg_count(len(current_messages))
+
             # we want to take only the content of each message and send as alist
             current_messages = [message.content for message in current_messages]
             network.collapse_config.should_collapse(comp, current_round, current_messages)
@@ -162,7 +167,20 @@ def log_statistics(network: initializationModule.Initialization):
     logger.info("\n\nSystem Resource Statistics:\n")
     process = psutil.Process()
     memory_info = process.memory_info()
-    logger.info("   Peak memory consumption: %.2f MB", memory_info.peak_wset / (1024 * 1024))
+
+    #changed to work on linux and macOS not just windows
+    if sys.platform == "win32" and hasattr(memory_info, "peak_wset"):
+        peak_memory = memory_info.peak_wset / (1024 * 1024)
+    else:
+        import resource
+        peak_memory = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        # ru_maxrss is in kilobytes on Linux, bytes on macOS
+        if sys.platform == "darwin":
+            peak_memory = peak_memory / (1024 * 1024)
+        else:
+            peak_memory = peak_memory / 1024  # Convert KB to MB
+
+    logger.info("   Peak memory consumption: %.2f MB", peak_memory)
     try:
         cpu_percent = process.cpu_percent(interval=1.0)
         logger.info("   Average CPU utilization: %.2f%%", cpu_percent)

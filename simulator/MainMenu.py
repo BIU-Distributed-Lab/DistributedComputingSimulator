@@ -175,6 +175,12 @@ class MenuWindow(QMainWindow):
 
         self.number_input = QLineEdit(self)
         self.number_input.setPlaceholderText("Enter a number")
+
+        # Set the saved value if it exists
+        saved_number = self.checkbox_values.get("Number of Computers", "")
+        if saved_number:
+            self.number_input.setText(str(saved_number))
+
         layout.addWidget(self.number_input)
 
         # Initially disable the submit button
@@ -228,7 +234,14 @@ class MenuWindow(QMainWindow):
         items_list = options.split(", ")
         items_list.insert(0, "")
         combo_box.addItems(items_list)
-        combo_box.setCurrentText("")
+
+        # Set the current value from saved network variables
+        saved_value = self.checkbox_values.get(label_text, "")
+        if saved_value and saved_value in items_list:
+            combo_box.setCurrentText(saved_value)
+        else:
+            combo_box.setCurrentText("")
+
         layout.addWidget(combo_box)
 
         self.combo_boxes[label_text] = combo_box
