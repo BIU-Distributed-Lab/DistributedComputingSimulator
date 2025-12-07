@@ -271,7 +271,8 @@ class MenuWindow(QMainWindow):
         """
         Handle the upload of a topology file.
         """
-        fname, _ = QFileDialog.getOpenFileName(self, 'Upload Text File', '/home', "Text Files (*.txt)")
+        initial_dir = os.getcwd()
+        fname, _ = QFileDialog.getOpenFileName(self, 'Upload Text File', initial_dir, "Text Files (*.txt)")
         if fname:
             _, file_extension = os.path.splitext(fname)
             if file_extension.lower() == '.txt':
