@@ -210,9 +210,9 @@ class MenuWindow(QMainWindow):
         number_of_computers = int(self.checkbox_values.get("Number of Computers", 0))
         display_type = self.checkbox_values.get("Display", "")
 
-        if number_of_computers > 500 and display_type != "Text":
+        if number_of_computers > 50 and display_type != "Text":
             QMessageBox.warning(self, 'Error',
-                                'The number of computers cannot exceed 500 unless the display is set to Text. You will be able to submit only if you choose Text output!',
+                                'The number of computers cannot exceed 50 unless the display is set to Text. You will be able to submit only if you choose Text output!',
                                 QMessageBox.Ok)
             self.submit_button.setEnabled(False)
         else:
