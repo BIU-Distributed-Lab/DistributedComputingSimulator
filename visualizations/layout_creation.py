@@ -42,7 +42,7 @@ def set_button_style(button, normal_style, pressed_style):
 
 
 
-def layoutCreation(self):
+def layoutCreation(self, topologyType):
     """
     Create and configure the graph visualization layout.
 
@@ -72,7 +72,8 @@ def layoutCreation(self):
     round_label_layout.addStretch(1)
     main_layout.addLayout(round_label_layout)  # Add the centered round label layout
 
-    # main_layout.addWidget(self.choice_combo)  # change!!!
+    if topologyType == "Custom" or topologyType == "Random":
+        main_layout.addWidget(self.choice_combo)
     # main_layout.addWidget(self.regenarate_button)
     main_layout.addWidget(self.view)
 

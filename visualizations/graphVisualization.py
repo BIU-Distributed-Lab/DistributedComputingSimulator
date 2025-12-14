@@ -156,7 +156,7 @@ class GraphVisualizer(QWidget):
         """
         Calls the layout creation function to arrange nodes in the graph.
         """
-        glc.layoutCreation(self)
+        glc.layoutCreation(self, self.network.topologyType)  # changed....
 
     def wheelEvent(self, event):
         """
