@@ -202,11 +202,12 @@ class MenuWindow(QMainWindow):
         Args:
             value (str): The input value to validate.
         """
-        if value.isdigit():
+        if value.isdigit() and int(value) > 0:
             number = int(value)
             self.checkbox_values["Number of Computers"] = number
             self.validate_display_type()
-        else:
+        elif value != "":
+            QMessageBox.warning(self, 'Error', 'The number of computers must be a positive integer.', QMessageBox.Ok)
             self.submit_button.setEnabled(False)
 
     def validate_display_type(self):
