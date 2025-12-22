@@ -57,7 +57,7 @@ class GraphVisualizer(QWidget):
         self.graph = nx.DiGraph()
         self.num_nodes = self.network.computer_number
         self.nodes_map = {} # A dictionary mapping node names to Node objects (Str -> Node).
-        self.nx_layout = {"circular": nx.circular_layout, "random": nx.random_layout,} # A dictionary mapping layout names to NetworkX layout functions.
+        self.nx_layout = {"circular": nx.circular_layout, "spring": nx.spring_layout, } # A dictionary mapping layout names to NetworkX layout functions.
         
         self.init_graph()
         self.init_ui()
@@ -91,9 +91,14 @@ class GraphVisualizer(QWidget):
         """
         self.scene = QGraphicsScene()  # manages and organizes the items that make up the visualization.
         self.view = QGraphicsView(self.scene) # visual display for the scene.
-        self.graph_scale = 200
+        self.graph_scale = 150
         self.load_graph()
-        self.set_nx_layout("circular")
+        # Set the appropriate layout to the given topology
+        if self.network.topologyType in {"Tree", "Star", "random"}:
+            self.set_nx_layout("spring")
+        else:
+            self.set_nx_layout("circular")
+
         self.zoom_factor = 1.15
         self.zoom_step = 1.1
         self.view.wheelEvent = self.wheelEvent
@@ -116,14 +121,15 @@ class GraphVisualizer(QWidget):
             name (str): The name of the layout to set (e.g., 'circular', 'random').
         """
         self.nx_layout_function = self.nx_layout[name]
-        positions = self.nx_layout_function(self.graph)
-        
-        if self.graph.number_of_nodes() > 200:
-            glc.set_nx_layout_large_graph(self, positions)
-        elif name == "circular":
-            glc.set_nx_layout_circular_graph(self, positions)
-        else:  # random layout with not a lot of nodes
-            glc.set_nx_layout_random_small_graph(self, name, positions)
+        positions = self.nx_layout_function(self.graph, scale=2)
+
+        glc.set_nx_layout_circular_graph(self, positions)
+        #if self.graph.number_of_nodes() > 200:
+        #    glc.set_nx_layout_large_graph(self, positions)
+        #elif name == "circular":
+        #    glc.set_nx_layout_circular_graph(self, positions)
+        #else:  # random layout with not a lot of nodes
+        #    glc.set_nx_layout_random_small_graph(self, name, positions)
 
             
     def load_graph(self):
@@ -150,7 +156,7 @@ class GraphVisualizer(QWidget):
         """
         Calls the layout creation function to arrange nodes in the graph.
         """
-        glc.layoutCreation(self)
+        glc.layoutCreation(self, self.network.topologyType)  # changed....
 
     def wheelEvent(self, event):
         """
@@ -220,6 +226,30 @@ class GraphVisualizer(QWidget):
         """
         gf.update_node_color(self, node_name, values_change_dict)
 
+    def save_topology_file(self):
+        initial_dir = os.getcwd()
+        fname, _ = QFileDialog.getSaveFileName(None, 'Save', initial_dir, "Text Files (*.txt)")
+        if fname:
+            lines = list()
+            lines.append("IDs List:")
+            lines.append(','.join(map(str, list(self.graph.nodes))))
+            lines.append("Number of Computers:")
+            lines.append(str(self.num_nodes))
+            lines.append("Root ID:")
+            lines.append(str(self.network.root_id))
+            lines.append("Edges:")
+            edges = ','.join(map(str, list(self.graph.edges)))
+            lines.append(edges.replace(" ", "").replace("'", ""))
+            try:
+                with open(fname, 'w') as f:
+                    f.writelines(line + '\n' for line in lines)
+            except PermissionError:
+                print("Error: You don't have permission to write to this location.")
+            except TypeError:
+                print("Error: The list contains non-string data.")
+            except Exception as e:
+                print(f"An unexpected error occurred: {e}")
+
 
 def visualize_network(network: initializationModule.Initialization, comm):
     """
@@ -236,5 +266,5 @@ def visualize_network(network: initializationModule.Initialization, comm):
     graph_window.setWindowIcon(QIcon('./designFiles/app_icon.jpeg'))
 
     graph_window.show()
-    graph_window.resize(1000, 800)
+    graph_window.resize(1000*1.2, 800*1.2)  # changed
     

@@ -149,11 +149,13 @@ class Initialization:
             if isinstance(root_id, str) and root_id.lower() == "random":
                 selected_computer = random.choice(self.connected_computers)
                 selected_computer.is_root = True
+                self.root_id = selected_computer.id
             else:
                 selected_computer = self.network_dict.get(root_id)
                 if selected_computer is None:
                     raise ParseTopologyFileError(f"Root ID {root_id} not found in ids_list")
                 selected_computer.is_root = True
+                self.root_id = selected_computer.id
 
             for u, v in edges_set:
                 self.network_dict[u].connectedEdges.append(v)
@@ -530,9 +532,11 @@ class Initialization:
         if self.root_type == "Random":
             selected_computer = random.choice(self.connected_computers)
             selected_computer.is_root = True
+            self.root_id = selected_computer.id
         elif self.root_type == "Min ID":
             selected_computer = min(self.connected_computers, key=lambda computer: computer.id)
             selected_computer.is_root = True
+            self.root_id = selected_computer.id
 
     def find_computer(self, id: int) -> Computer:
         """

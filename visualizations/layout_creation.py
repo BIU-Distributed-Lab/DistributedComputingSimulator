@@ -42,7 +42,7 @@ def set_button_style(button, normal_style, pressed_style):
 
 
 
-def layoutCreation(self):
+def layoutCreation(self, topologyType):
     """
     Create and configure the graph visualization layout.
 
@@ -72,7 +72,8 @@ def layoutCreation(self):
     round_label_layout.addStretch(1)
     main_layout.addLayout(round_label_layout)  # Add the centered round label layout
 
-    # main_layout.addWidget(self.choice_combo)
+    if topologyType == "Custom" or topologyType == "Random":
+        main_layout.addWidget(self.choice_combo)
     # main_layout.addWidget(self.regenarate_button)
     main_layout.addWidget(self.view)
 
@@ -103,6 +104,11 @@ def layoutCreation(self):
     #self.last_phase_label = QLabel("Last phase: None")
     #buttons_layout.addWidget(self.last_phase_label, 0, 0, 1, 2)
 
+    self.save_topology = QPushButton("Save Topology")
+    self.save_topology.setFixedSize(300, 40)
+    set_button_style(self.save_topology, normal_button_style, pressed_button_style)
+    self.save_topology.clicked.connect(lambda: self.save_topology_file())
+
     self.next_phase_button = QPushButton("Next Phase")
     self.next_phase_button.setFixedSize(300, 40)
     set_button_style(self.next_phase_button, normal_button_style, pressed_button_style)
@@ -126,6 +132,8 @@ def layoutCreation(self):
     buttons_layout.addWidget(self.slider_label, 0, 0, 1, 2)  # Move slider label above the line
     buttons_layout.addWidget(self.next_phase_button, 1, 0)
     buttons_layout.addWidget(self.next_5_phase_button, 1, 1)
+    if topologyType != "Custom":
+        buttons_layout.addWidget(self.save_topology, 1, 2)
     buttons_layout.addWidget(self.undo_button, 2, 0)
     buttons_layout.addWidget(self.reset_button, 2, 1)
 

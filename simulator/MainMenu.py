@@ -19,9 +19,9 @@ COMBOBOX_OPTIONS = {
     "Sync": "Sync, Async",
     "Topology": "Random, Clique, Line, Tree, Star, Custom",
     "ID Type": "Random, Sequential, Custom",
+    "Root": "No Root, Min ID, Random, Custom",  # was second to last.
     "Delay": "Constant, Random Constant, Random",
     "Display": "Text, Graph",
-    "Root": "No Root, Min ID, Random, Custom",
     "Logging": "Short, Medium, Long",
 }
 
@@ -88,6 +88,8 @@ class MenuWindow(QMainWindow):
             self.validate_number_input(value)
         elif key == "Display":
             self.validate_display_type()
+        elif value == "Custom":
+            self.handle_custom_topology()
 
         if key in self.label_values:
             self.label_values[key].setText(f"{key}: <span style='color: blue;'>{value}</span>")
@@ -153,10 +155,12 @@ class MenuWindow(QMainWindow):
         """
         checkbox_layout = QVBoxLayout()
 
-        self.add_number_input(checkbox_layout)  # adding the number of computers option
-
+        count = 1
         for key, options in COMBOBOX_OPTIONS.items():
             self.add_combo_box(checkbox_layout, key, options)
+            if count == 2:
+                self.add_number_input(checkbox_layout)  # adding the number of computers option
+            count = count + 1
 
         checkbox_layout.setSpacing(20)
         checkbox_widget = QWidget(self)
@@ -180,6 +184,8 @@ class MenuWindow(QMainWindow):
         saved_number = self.checkbox_values.get("Number of Computers", "")
         if saved_number:
             self.number_input.setText(str(saved_number))
+            if self.checkbox_values.get("Topology") == "Custom":
+                self.number_input.setDisabled(True)
 
         layout.addWidget(self.number_input)
 
@@ -196,11 +202,12 @@ class MenuWindow(QMainWindow):
         Args:
             value (str): The input value to validate.
         """
-        if value.isdigit():
+        if value.isdigit() and int(value) > 0:
             number = int(value)
             self.checkbox_values["Number of Computers"] = number
             self.validate_display_type()
-        else:
+        elif value != "":
+            QMessageBox.warning(self, 'Error', 'The number of computers must be a positive integer.', QMessageBox.Ok)
             self.submit_button.setEnabled(False)
 
     def validate_display_type(self):
@@ -210,9 +217,9 @@ class MenuWindow(QMainWindow):
         number_of_computers = int(self.checkbox_values.get("Number of Computers", 0))
         display_type = self.checkbox_values.get("Display", "")
 
-        if number_of_computers > 500 and display_type != "Text":
+        if number_of_computers > 50 and display_type != "Text":
             QMessageBox.warning(self, 'Error',
-                                'The number of computers cannot exceed 500 unless the display is set to Text. You will be able to submit only if you choose Text output!',
+                                'The number of computers cannot exceed 50 unless the display is set to Text. You will be able to submit only if you choose Text output!',
                                 QMessageBox.Ok)
             self.submit_button.setEnabled(False)
         else:
@@ -290,14 +297,18 @@ class MenuWindow(QMainWindow):
         """
         self.checkbox_values["Topology File"] = ""
         self.update_value("Topology File", "")
-        self.combo_boxes["Topology"].setCurrentText("Random")
+        self.number_input.setEnabled(True)
+        self.number_input.setText("")
+        self.combo_boxes["Topology"].setCurrentText("")
         self.combo_boxes["Topology"].setEnabled(True)
-        self.combo_boxes["Root"].setCurrentText("Random")
+        self.combo_boxes["Root"].setCurrentText("")
         self.combo_boxes["Root"].setEnabled(True)
-        self.combo_boxes["ID Type"].setCurrentText("Random")
+        self.combo_boxes["ID Type"].setCurrentText("")
         self.combo_boxes["ID Type"].setEnabled(True)
 
     def handle_custom_topology(self):
+        self.number_input.setText("1")
+        self.number_input.setEnabled(False)
         self.combo_boxes["Topology"].setCurrentText("Custom")
         self.combo_boxes["Topology"].setEnabled(False)
         self.combo_boxes["Root"].setCurrentText("Custom")
