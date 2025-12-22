@@ -226,6 +226,30 @@ class GraphVisualizer(QWidget):
         """
         gf.update_node_color(self, node_name, values_change_dict)
 
+    def save_topology_file(self):
+        initial_dir = os.getcwd()
+        fname, _ = QFileDialog.getSaveFileName(None, 'Save', initial_dir, "Text Files (*.txt)")
+        if fname:
+            lines = list()
+            lines.append("IDs List:")
+            lines.append(','.join(map(str, list(self.graph.nodes))))
+            lines.append("Number of Computers:")
+            lines.append(str(self.num_nodes))
+            lines.append("Root ID:")
+            lines.append(str(self.network.root_id))
+            lines.append("Edges:")
+            edges = ','.join(map(str, list(self.graph.edges)))
+            lines.append(edges.replace(" ", "").replace("'", ""))
+            try:
+                with open(fname, 'w') as f:
+                    f.writelines(line + '\n' for line in lines)
+            except PermissionError:
+                print("Error: You don't have permission to write to this location.")
+            except TypeError:
+                print("Error: The list contains non-string data.")
+            except Exception as e:
+                print(f"An unexpected error occurred: {e}")
+
 
 def visualize_network(network: initializationModule.Initialization, comm):
     """

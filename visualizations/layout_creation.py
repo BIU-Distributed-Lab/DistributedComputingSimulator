@@ -104,6 +104,11 @@ def layoutCreation(self, topologyType):
     #self.last_phase_label = QLabel("Last phase: None")
     #buttons_layout.addWidget(self.last_phase_label, 0, 0, 1, 2)
 
+    self.save_topology = QPushButton("Save Topology")
+    self.save_topology.setFixedSize(300, 40)
+    set_button_style(self.save_topology, normal_button_style, pressed_button_style)
+    self.save_topology.clicked.connect(lambda: self.save_topology_file())
+
     self.next_phase_button = QPushButton("Next Phase")
     self.next_phase_button.setFixedSize(300, 40)
     set_button_style(self.next_phase_button, normal_button_style, pressed_button_style)
@@ -127,6 +132,8 @@ def layoutCreation(self, topologyType):
     buttons_layout.addWidget(self.slider_label, 0, 0, 1, 2)  # Move slider label above the line
     buttons_layout.addWidget(self.next_phase_button, 1, 0)
     buttons_layout.addWidget(self.next_5_phase_button, 1, 1)
+    if topologyType != "Custom":
+        buttons_layout.addWidget(self.save_topology, 1, 2)
     buttons_layout.addWidget(self.undo_button, 2, 0)
     buttons_layout.addWidget(self.reset_button, 2, 1)
 
