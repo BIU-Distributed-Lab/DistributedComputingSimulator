@@ -14,7 +14,7 @@ from utils.logger_config import logger
 
 # Constants
 NETWORK_VARIABLES = 'network_variables.json'
-CHECKBOX_LAYOUT_GEOMETRY = (1000, 90, 500, 800)
+CHECKBOX_LAYOUT_GEOMETRY = (1000, 90, 500, 750)  # 1000, 90, 500, 800
 COMBOBOX_OPTIONS = {
     "Sync": "Sync, Async",
     "Topology": "Random, Clique, Line, Tree, Star, Custom",
@@ -99,11 +99,11 @@ class MenuWindow(QMainWindow):
         """
         Create labels for displaying the network variable values.
         """
-        y_offset = 300
+        y_offset = 350  # 300
         for key, value in self.checkbox_values.items():
             label = QLabel(f"{key}: <span style='color: blue;'>{value}</span>", self)
             label.setGeometry(50, y_offset, 1000, 30)
-            y_offset += 62
+            y_offset += 50   # 62
             self.label_values[key] = label
             self.label_values[key].setWordWrap(True)
 
@@ -111,6 +111,7 @@ class MenuWindow(QMainWindow):
         title_label.setText("Distributed Simulator Project")
         title_label.move(500, 25)
         title_label.resize(450, 40)
+        title_label.setStyleSheet("font-size: 30px;")
 
         info_label = QLabel(self)
         info_label.setText("Please upload your Python algorithm file:")
@@ -146,7 +147,7 @@ class MenuWindow(QMainWindow):
         trash_button.clicked.connect(lambda: self.on_delete_topology_file())
 
         self.submit_button = QPushButton("Submit", self)
-        self.submit_button.setGeometry(550, 900, 150, 30)
+        self.submit_button.setGeometry(600, 850, 200, 50)  # 550, 900, 150, 30
         self.submit_button.clicked.connect(lambda: self.on_submit_all())
 
     def create_options(self):
