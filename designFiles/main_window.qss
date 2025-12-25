@@ -1,19 +1,25 @@
+QMainWindow {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop: 0 #bee5fa, stop: 1 white);
+}
+
 * {
-    background-color: #d7d6d5 ;
     color: #000000;
     font-family: "Times font";
 }          
 
 QLabel{
-    color: #2e8d93;
-    font-size: 16px;
-
+    color: #114b7d;
+    font-size: 18px;
 }
 
 QCheckBox {
     color: #2e8d93;
     font-size: 19px;
     spacing: 15px;
+}
+
+QLineEdit:disabled {
+    background-color: #e0e0e0;
 }
 
 QLineEdit {
@@ -28,11 +34,12 @@ QLineEdit {
 }
 
 QPushButton {
-    background-color: #2e8d93;
+    background-color: #89bff8;
     border-style: outset;
+    border-color: #e3f1ff;
     border-width: 2px;
     border-radius: 10px;
-    font: 14px;
+    font: 16px;
     min-width: 5em;
 }
 
@@ -41,9 +48,15 @@ QPushButton:pressed {
 }
 
 QPushButton:hover {
-    background: #267288;
+    background: #408ee0;
+}
+
+QComboBox:disabled {
+    background-color: #e0e0e0;
+    font-size: 16px;
 }
 
 QComboBox {
-    font-size: 14px;
+    background-color: white;
+    font-size: 16px;
 }
