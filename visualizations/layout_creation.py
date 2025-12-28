@@ -16,32 +16,6 @@ from PyQt5.QtCore import Qt, QTimer, QPointF
 from visualizations.edge import Edge
 
 
-# Define the normal and pressed styles
-normal_button_style = """
-    QPushButton {
-        padding: 5px; 
-        font-size: 14px; 
-        background-color: lightblue;
-    }
-"""
-pressed_button_style = """
-    QPushButton {
-        padding: 5px; 
-        font-size: 14px; 
-        background-color: darkblue;
-        color: white;
-    }
-"""
-
-
-def set_button_style(button, normal_style, pressed_style):
-    button.setStyleSheet(normal_style)
-    button.pressed.connect(lambda: button.setStyleSheet(pressed_style))
-    button.released.connect(lambda: button.setStyleSheet(normal_style))
-
-
-
-
 def layoutCreation(self, topologyType):
     """
     Create and configure the graph visualization layout.
@@ -62,9 +36,6 @@ def layoutCreation(self, topologyType):
 
     self.round_label = QLabel("Round: 0")
     self.round_label.setAlignment(Qt.AlignCenter)  # Center the label
-    font = self.round_label.font()
-    font.setPointSize(16)  # Set the font size to 16
-    self.round_label.setFont(font)
 
     round_label_layout = QHBoxLayout()
     round_label_layout.addStretch(1)
@@ -73,7 +44,7 @@ def layoutCreation(self, topologyType):
     main_layout.addLayout(round_label_layout)  # Add the centered round label layout
 
     if topologyType == "Custom" or topologyType == "Random":
-        main_layout.addWidget(self.choice_combo)
+        main_layout.addWidget(self.choice_combo, 1, alignment=Qt.AlignHCenter)
     # main_layout.addWidget(self.regenarate_button)
     main_layout.addWidget(self.view)
 
@@ -105,37 +76,27 @@ def layoutCreation(self, topologyType):
     #buttons_layout.addWidget(self.last_phase_label, 0, 0, 1, 2)
 
     self.save_topology = QPushButton("Save Topology")
-    self.save_topology.setFixedSize(300, 40)
-    set_button_style(self.save_topology, normal_button_style, pressed_button_style)
     self.save_topology.clicked.connect(lambda: self.save_topology_file())
 
     self.next_phase_button = QPushButton("Next Phase")
-    self.next_phase_button.setFixedSize(300, 40)
-    set_button_style(self.next_phase_button, normal_button_style, pressed_button_style)
     self.next_phase_button.clicked.connect(lambda: self.change_node_color(1))
 
     self.next_5_phase_button = QPushButton("Next 5 Phases")
-    self.next_5_phase_button.setFixedSize(300, 40)
-    set_button_style(self.next_5_phase_button, normal_button_style, pressed_button_style)
     self.next_5_phase_button.clicked.connect(lambda: self.change_node_color(5))
 
     self.undo_button = QPushButton('Undo', self)
-    self.undo_button.setFixedSize(300, 40)
-    set_button_style(self.undo_button, normal_button_style, pressed_button_style)
     self.undo_button.clicked.connect(self.undo_change)
 
     self.reset_button = QPushButton('Reset', self)
-    self.reset_button.setFixedSize(300, 40)
-    set_button_style(self.reset_button, normal_button_style, pressed_button_style)
     self.reset_button.clicked.connect(self.reset)
 
     buttons_layout.addWidget(self.slider_label, 0, 0, 1, 2)  # Move slider label above the line
-    buttons_layout.addWidget(self.next_phase_button, 1, 0)
-    buttons_layout.addWidget(self.next_5_phase_button, 1, 1)
+    buttons_layout.addWidget(self.next_phase_button, 1, 0, alignment=Qt.AlignRight)
+    buttons_layout.addWidget(self.next_5_phase_button, 1, 1, alignment=Qt.AlignLeft)
+    buttons_layout.addWidget(self.undo_button, 2, 0, Qt.AlignRight)
+    buttons_layout.addWidget(self.reset_button, 2, 1, Qt.AlignLeft)
     if topologyType != "Custom":
-        buttons_layout.addWidget(self.save_topology, 1, 2)
-    buttons_layout.addWidget(self.undo_button, 2, 0)
-    buttons_layout.addWidget(self.reset_button, 2, 1)
+        buttons_layout.addWidget(self.save_topology, 2, 2, Qt.AlignLeft)
 
     # Add the horizontal layouts to the main layout
     main_layout.addLayout(slider_h_layout)

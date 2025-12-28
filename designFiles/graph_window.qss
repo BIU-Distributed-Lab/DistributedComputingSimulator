@@ -1,21 +1,23 @@
 * {
-    background-color: #d7d6d5 ;
+    background-color: #bee5fa;
     color: #000000;
     font-family: Georgia;
 }          
 
 QLabel{
-    color: #2e8d93;
-    font-size: 19px;
+    color: #114b7d;
+    font-size: 25px;
 }
 
 QPushButton {
-    background-color: #2e8d93;
+    background-color: #89bff8;
     border-style: outset;
+    border-color: #e3f1ff;
     border-width: 2px;
     border-radius: 10px;
-    font: 14px;
-    min-width: 5em;
+    font: 20px;
+    min-width: 300px;
+    min-height: 40px;
 }
 
 QPushButton:pressed {
@@ -23,11 +25,11 @@ QPushButton:pressed {
 }
 
 QPushButton:hover {
-    background: #267288;
+    background-color: #408ee0;
 }
 
 QComboBox {
-    font-size: 14px;
+    font-size: 20px;
 }
 
 QSlider::groove:horizontal {
