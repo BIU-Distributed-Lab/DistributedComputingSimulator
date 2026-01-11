@@ -3,6 +3,7 @@ import threading
 import sys
 import time
 import json
+import argparse
 
 from utils.exceptions import *
 from utils.logger_config import logger
@@ -10,13 +11,13 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import QTimer
 from utils.logger_config import logger
+from utils.logger_config import loggerConfig
 import simulator.runModule as runModule
 import simulator.communication as communication
 import simulator.initializationModule as initializationModule
 import simulator.MainMenu as MainMenu
 from simulator.MainMenu import NETWORK_VARIABLES
 import visualizations.graphVisualization as graphVisualization
-
 OUTPUT_FILE = './output.txt'
 
 def load_network_variables():
@@ -58,11 +59,7 @@ def initializeSimulator():
                 else:
                     sys.exit()
 
-
-
             network = initializationModule.Initialization(network_variables)
-            if network.logging_type != "Short":
-                logger.info(network)
 
             comm = communication.Communication(network)
             logger.debug("Network and Communication objects created")
@@ -112,22 +109,30 @@ def runSimulator(network: initializationModule.Initialization, comm: communicati
         runModule.initiateRun(network, comm, network_variables['Sync'])
         algorithm_run_time = time.time() - start_time - net_creation_time
 
-    logger.info("--- Total Simulation Time : %s seconds ---" % (time.time() - start_time))
-    logger.info("--- Net Creation Time : %s seconds ---" % (net_creation_time))
-    logger.info("--- Algorithm Run Time : %s seconds ---" % (algorithm_run_time))
-    
-def main(for_testing=False):
+    logger.summary("--- Total Simulation Time : %s seconds ---" % (time.time() - start_time))
+    logger.summary("--- Net Creation Time : %s seconds ---" % (net_creation_time))
+    logger.summary("--- Algorithm Run Time : %s seconds ---" % (algorithm_run_time))
+
+
+def main():
     """
     Main entry point for the simulator. Redirects standard output to a log file and runs the simulator.
     """
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--debug", action="store_true")
+    parser.add_argument("--testing", action="store_true")
+    args = parser.parse_args()
+    if args.debug:
+        loggerConfig.output_debug()
+
     #sys.stdout = open(OUTPUT_FILE, "w")
     logger.info("Starting the simulator")
     logger.debug("check if print to console")
     start_time = time.time()
     network, comm, network_variables = initializeSimulator()
-    runSimulator(network, comm, network_variables, start_time, for_testing)
+    runSimulator(network, comm, network_variables, start_time, args.testing)
     
-    if for_testing:
+    if args.testing:
         return network, comm, network_variables
 
 

@@ -22,7 +22,7 @@ COMBOBOX_OPTIONS = {
     "Root": "No Root, Min ID, Random, Custom",  # was second to last.
     "Delay": "Constant, Random Constant, Random",
     "Display": "Text, Graph",
-    "Logging": "Short, Medium, Long",
+    "Logging": "Short, Long",
 }
 
 
