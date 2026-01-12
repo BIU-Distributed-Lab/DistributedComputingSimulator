@@ -38,7 +38,7 @@ def load_network_variables():
         return {}
 
 
-def initializeSimulator(no_GUI):
+def initializeSimulator():
     """
     Initializes the simulator by creating the network, communication instances, and loading network variables.
 
@@ -51,14 +51,13 @@ def initializeSimulator(no_GUI):
         try:
             logger.debug("Loading network variables")
             network_variables = load_network_variables()
-            if not no_GUI:
-                exitButtonPressed = MainMenu.menu(network_variables, show_error)
+            exitButtonPressed = MainMenu.menu(network_variables, show_error)
 
-                if exitButtonPressed:
-                    if for_testing:
-                        return None, None, None
-                    else:
-                        sys.exit()
+            if exitButtonPressed:
+                if for_testing:
+                    return None, None, None
+                else:
+                    sys.exit()
 
             network = initializationModule.Initialization(network_variables)
 
@@ -122,7 +121,6 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--debug", action="store_true")
     parser.add_argument("--testing", action="store_true")
-    parser.add_argument("--no-GUI", action="store_true")
     args = parser.parse_args()
     if args.debug:
         loggerConfig.output_debug()
@@ -131,7 +129,7 @@ def main():
     logger.info("Starting the simulator")
     logger.debug("check if print to console")
     start_time = time.time()
-    network, comm, network_variables = initializeSimulator(args.no_GUI)
+    network, comm, network_variables = initializeSimulator()
     runSimulator(network, comm, network_variables, start_time, args.testing)
     
     if args.testing:
