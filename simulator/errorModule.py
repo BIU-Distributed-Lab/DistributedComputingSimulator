@@ -212,19 +212,19 @@ class CollapseConfig:
         Log the collapsed nodes for debugging.
         """
         # iterate collapse log and print
-        logger.info("=== ERROR MODULE COLLAPSE STATISTICS ===")
+        logger.summary("=== ERROR MODULE COLLAPSE STATISTICS ===")
         if self.collapse_log:
-            logger.info("Collapse Config Class Log:")
+            logger.summary("Collapse Config Class Log:")
             for node_id, collapse_info in self.collapse_log.items():
                 round_info = f"at round {collapse_info['round']}" if collapse_info['round'] is not None else ""
-                logger.info(f"Node {node_id} collapsed {round_info}, "
+                logger.summary(f"Node {node_id} collapsed {round_info}, "
                             f"message received: {collapse_info['received_msg_count']} and "
                             f"msg sent: {collapse_info['sent_msg_count']}")
 
         else:
-            logger.info("No nodes collapsed during the simulation.")
+            logger.summary("No nodes collapsed during the simulation.")
 
-        logger.info("=== END OF ERROR MODULE COLLAPSE STATISTICS ===")
+        logger.summary("=== END OF ERROR MODULE COLLAPSE STATISTICS ===")
 
 
 class ReorderConfig:
@@ -281,12 +281,12 @@ class ReorderConfig:
         """
         Log the unordered edges for debugging.
         """
-        logger.info("=== ERROR MODULE REORDER STATISTICS ===")
+        logger.summary("=== ERROR MODULE REORDER STATISTICS ===")
         if self.unordered_edges:
-            logger.info(f"Unordered edges: {self.unordered_edges}")
+            logger.summary(f"Unordered edges: {self.unordered_edges}")
         else:
-            logger.info("No unordered edges configured.")
-        logger.info("=== END OF ERROR MODULE REORDER STATISTICS ===")
+            logger.summary("No unordered edges configured.")
+        logger.summary("=== END OF ERROR MODULE REORDER STATISTICS ===")
 
 class MessageCorruptionStats:
     """
@@ -379,41 +379,41 @@ class MessageCorruptionStats:
         
     def log_corruption_statistics(self):
         """Log comprehensive corruption statistics."""
-        logger.info("Message Corruption Statistics:")
-        logger.info(f"Total messages processed: {self.total_messages_processed}")
-        logger.info(f"Messages lost: {self.messages_lost} (attempts: {self.loss_attempts})")
-        logger.info(f"Messages corrupted: {self.messages_corrupted} (attempts: {self.corruption_attempts})")
+        logger.summary("Message Corruption Statistics:")
+        logger.summary(f"Total messages processed: {self.total_messages_processed}")
+        logger.summary(f"Messages lost: {self.messages_lost} (attempts: {self.loss_attempts})")
+        logger.summary(f"Messages corrupted: {self.messages_corrupted} (attempts: {self.corruption_attempts})")
         
         if self.total_messages_processed > 0:
             loss_rate = (self.messages_lost / self.total_messages_processed) * 100
             corruption_rate = (self.messages_corrupted / self.total_messages_processed) * 100
-            logger.info(f"Loss rate: {loss_rate:.2f}%")
-            logger.info(f"Corruption rate: {corruption_rate:.2f}%")
+            logger.summary(f"Loss rate: {loss_rate:.2f}%")
+            logger.summary(f"Corruption rate: {corruption_rate:.2f}%")
             
         # Log corruption by type
         if any(count > 0 for count in self.corruption_by_type.values()):
-            logger.info("Corruption by data type:")
+            logger.summary("Corruption by data type:")
             for data_type, count in self.corruption_by_type.items():
                 if count > 0:
-                    logger.info(f"  {data_type}: {count}")
+                    logger.summary(f"  {data_type}: {count}")
                     
         # Log corruption by field
         if self.corruption_by_field:
-            logger.info("Corruption by field:")
+            logger.summary("Corruption by field:")
             for field_name, field_stats in self.corruption_by_field.items():
-                logger.info(f"  {field_name}: {field_stats['count']} corruptions")
+                logger.summary(f"  {field_name}: {field_stats['count']} corruptions")
                 for corruption_type, type_count in field_stats['types'].items():
-                    logger.info(f"    {corruption_type}: {type_count}")
+                    logger.summary(f"    {corruption_type}: {type_count}")
                     
         # Log recent corruption events (last 10)
         if self.corruption_log:
-            logger.info("Recent corruption events:")
+            logger.summary("Recent corruption events:")
             recent_events = self.corruption_log[-10:] if len(self.corruption_log) > 10 else self.corruption_log
             for event in recent_events:
                 if event['type'] == 'loss':
-                    logger.info(f"  [Loss] Message: {event['message'][:50]}... (p={event['probability']})")
+                    logger.summary(f"  [Loss] Message: {event['message'][:50]}... (p={event['probability']})")
                 else:
-                    logger.info(f"  [Corruption] Original: {event['original'][:30]}... -> Corrupted: {event['corrupted'][:30]}...")
+                    logger.summary(f"  [Corruption] Original: {event['original'][:30]}... -> Corrupted: {event['corrupted'][:30]}...")
                     
     def get_statistics_summary(self):
         """Get a summary of corruption statistics as a dictionary."""
@@ -532,9 +532,9 @@ def log_all_error_statistics():
     Convenience function to log all error module statistics.
     Should be called at the end of simulation to get comprehensive error statistics.
     """
-    logger.info("=== ERROR MODULE CORRUPT MESSAGES STATISTICS ===")
+    logger.summary("=== ERROR MODULE CORRUPT MESSAGES STATISTICS ===")
     corruption_stats.log_corruption_statistics()
-    logger.info("=== END OF ERROR MODULE CORRUPT MESSAGES STATISTICS ===")
+    logger.summary("=== END OF ERROR MODULE CORRUPT MESSAGES STATISTICS ===")
 
 def get_all_error_statistics():
     """
@@ -554,4 +554,4 @@ def reset_error_statistics():
     """
     global corruption_stats
     corruption_stats = MessageCorruptionStats()
-    logger.info("Error module statistics reset")
+    logger.summary("Error module statistics reset")

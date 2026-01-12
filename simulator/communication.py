@@ -128,8 +128,8 @@ class Communication:
             message (Message): The message that was received.
             comm (Communication): The communication object handling the message passing.
         """
-        if self.network.logging_type == "Long":
-            logger.info(message.to_dict())
+        #if self.network.logging_type == "Long":\
+        logger.info(message.to_dict())
 
         received_computer = self.network.network_dict.get(message.dest_id)
 

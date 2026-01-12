@@ -22,7 +22,7 @@ COMBOBOX_OPTIONS = {
     "Root": "No Root, Min ID, Random, Custom",  # was second to last.
     "Delay": "Constant, Random Constant, Random",
     "Display": "Text, Graph",
-    "Logging": "Short, Medium, Long",
+    "Logging": "Short, Long",
 }
 
 
@@ -89,6 +89,8 @@ class MenuWindow(QMainWindow):
         elif key == "Display":
             self.validate_display_type()
         elif value == "Custom":
+            self.custom_mode_button.setText("Custom Mode: on")
+            self.custom_mode_button.setChecked(True)
             self.handle_custom_topology()
 
         if key in self.label_values:
@@ -142,9 +144,11 @@ class MenuWindow(QMainWindow):
         upload__topology_file_button.setGeometry(50, 250, 200, 30)
         upload__topology_file_button.clicked.connect(lambda: self.on_upload_topology())
 
-        trash_button = QPushButton("Reset", self)
-        trash_button.setGeometry(260, 250, 30, 30)
-        trash_button.clicked.connect(lambda: self.on_delete_topology_file())
+        self.custom_mode_button = QPushButton("Custom Mode: off", self)
+        self.custom_mode_button.setObjectName("customModeButton")
+        self.custom_mode_button.setCheckable(True)
+        self.custom_mode_button.setGeometry(600, 150, 150, 40)
+        self.custom_mode_button.clicked.connect(lambda: self.custom_mode_button_pressed())
 
         self.submit_button = QPushButton("Submit", self)
         self.submit_button.setGeometry(600, 850, 200, 50)  # 550, 900, 150, 30
@@ -258,6 +262,8 @@ class MenuWindow(QMainWindow):
 
         # Disable the combo box if the network variable is set to "Custom"
         if self.checkbox_values.get(label_text) == "Custom":
+            self.custom_mode_button.setChecked(True)
+            self.custom_mode_button.setText("Custom Mode: on")
             combo_box.setEnabled(False)
             self.combo_boxes[label_text].setCurrentText("Custom")
 
@@ -274,6 +280,12 @@ class MenuWindow(QMainWindow):
                 self.update_value("Algorithm", fname)
             else:
                 QMessageBox.warning(self, 'Error', 'Please select a Python file (.py)', QMessageBox.Ok)
+
+    def custom_mode_button_pressed(self):
+        if self.custom_mode_button.isChecked():
+            self.handle_custom_topology()
+        else:
+            self.on_delete_topology_file()
 
     def on_upload_topology(self):
         """
@@ -306,6 +318,7 @@ class MenuWindow(QMainWindow):
         self.combo_boxes["Root"].setEnabled(True)
         self.combo_boxes["ID Type"].setCurrentText("")
         self.combo_boxes["ID Type"].setEnabled(True)
+        self.custom_mode_button.setText("Custom Mode: off")
 
     def handle_custom_topology(self):
         self.number_input.setText("1")
@@ -316,6 +329,7 @@ class MenuWindow(QMainWindow):
         self.combo_boxes["Root"].setEnabled(False)
         self.combo_boxes["ID Type"].setCurrentText("Custom")
         self.combo_boxes["ID Type"].setEnabled(False)
+        self.custom_mode_button.setText("Custom Mode: on")
 
     def on_submit_all(self):
         """

@@ -11,6 +11,7 @@ import random
 import sys
 import math
 from utils.logger_config import logger
+from utils.logger_config import loggerConfig
 from simulator.computer import Computer
 from simulator.data_structures.union_find import UnionFind
 from simulator.data_structures.custom_min_heap import CustomMinHeap
@@ -51,6 +52,7 @@ class Initialization:
             self.network_dict = {comp.id: comp for comp in self.connected_computers}
 
         # always
+        loggerConfig.output_to_file(self.logging_type)  # add logger to .txt file.
         self.message_queue = CustomDict() if network_variables['Sync'] == "Sync" else CustomMinHeap()
         self.node_values_change = []  # for graph display
         self.edges_delays = {}  # holds the delays of each edge in the network

@@ -48,7 +48,16 @@ QPushButton:pressed {
 }
 
 QPushButton:hover {
-    background: #408ee0;
+    background-color: #408ee0;
+}
+
+#customModeButton {
+    background-color: #e0e0e0;
+    border-radius: 4px;
+}
+
+#customModeButton:checked {
+    background-color: #89bff8;
 }
 
 QComboBox:disabled {
