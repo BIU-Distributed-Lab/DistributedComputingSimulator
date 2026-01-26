@@ -10,6 +10,8 @@ import os
 import random
 import sys
 import math
+
+import utils.logger_config
 from utils.logger_config import logger
 from utils.logger_config import loggerConfig
 from simulator.computer import Computer
@@ -50,6 +52,7 @@ class Initialization:
             self.root_selection()
             self.create_connected_computers()
             self.network_dict = {comp.id: comp for comp in self.connected_computers}
+            self.update_output_file()
 
         # always
         loggerConfig.output_to_file(self.logging_type)  # add logger to .txt file.
@@ -67,6 +70,16 @@ class Initialization:
         # if async create delays for edges
         if network_variables['Sync'] == "Async":
             self.delays_creation() # used for creating delays for edges, not used in current version
+
+    def update_output_file(self):
+        if self.output_file != '':
+            try:
+                with open(self.output_file, 'w') as f:
+                    utils.logger_config.OUTPUT_FILE = self.output_file
+            except PermissionError:
+                print("Error: You don't have permission to write to this location.")
+            except Exception as e:
+                print(f"An unexpected error occurred: {e}")
 
     def parse_topology_file(self, file_path, network_variables):
         """
@@ -216,6 +229,7 @@ class Initialization:
         self.algorithm_path = network_variables_data.get('Algorithm', 'no_alg_provided')
         self.logging_type = network_variables_data.get('Logging', 'Short')
         self.sync = network_variables_data.get('Sync')
+        self.output_file = network_variables_data.get('Output File')
 
     def __str__(self) -> list:
         """
