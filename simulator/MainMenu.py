@@ -343,8 +343,8 @@ class MenuWindow(QMainWindow):
             try:
                 with open(fname, 'w') as f:
                     utils.logger_config.OUTPUT_FILE = fname
-                    self.checkbox_values["Config"] = fname
-                    self.update_value("Config", fname)
+                    self.checkbox_values["Output File"] = fname
+                    self.update_value("Output File", fname)
             except PermissionError:
                 print("Error: You don't have permission to write to this location.")
             except Exception as e:
@@ -353,8 +353,8 @@ class MenuWindow(QMainWindow):
     def on_delete_output_file(self):
         # os.remove(utils.logger_config.OUTPUT_FILE)
         utils.logger_config.OUTPUT_FILE = "output.txt"
-        self.checkbox_values["Config"] = ""
-        self.update_value("Config", "")
+        self.checkbox_values["Output File"] = ""
+        self.update_value("Output File", "")
 
     def handle_custom_topology(self):
         self.number_input.setText("1")
