@@ -10,6 +10,8 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import sys
 import os
+
+import utils.logger_config
 from utils.logger_config import logger
 
 # Constants
@@ -101,11 +103,11 @@ class MenuWindow(QMainWindow):
         """
         Create labels for displaying the network variable values.
         """
-        y_offset = 350  # 300
+        y_offset = 450  # 300
         for key, value in self.checkbox_values.items():
             label = QLabel(f"{key}: <span style='color: blue;'>{value}</span>", self)
             label.setGeometry(50, y_offset, 1000, 30)
-            y_offset += 50   # 62
+            y_offset += 40   # 50
             self.label_values[key] = label
             self.label_values[key].setWordWrap(True)
 
@@ -127,6 +129,12 @@ class MenuWindow(QMainWindow):
         info_label.resize(650, 50)
         info_label.setStyleSheet("color: blue;")  # Set the color of the info label to blue
 
+        info_label = QLabel(self)
+        info_label.setText("Change output file:")
+        info_label.move(50, 300)
+        info_label.resize(650, 50)
+        info_label.setStyleSheet("color: blue;")  # Set the color of the info label to blue
+
     def get_button_color(self, button):
         palette = button.palette()
         color = palette.color(QPalette.Button)
@@ -144,6 +152,14 @@ class MenuWindow(QMainWindow):
         upload__topology_file_button.setGeometry(50, 250, 200, 30)
         upload__topology_file_button.clicked.connect(lambda: self.on_upload_topology())
 
+        choose_output_file_button = QPushButton("Choose Output File", self)
+        choose_output_file_button.setGeometry(50, 350, 200, 30)
+        choose_output_file_button.clicked.connect(lambda: self.on_upload_output_file())
+
+        reset_output_file_button = QPushButton("Reset", self)
+        reset_output_file_button.setGeometry(270, 350, 100, 30)
+        reset_output_file_button.clicked.connect(lambda: self.on_delete_output_file())
+
         self.custom_mode_button = QPushButton("Custom Mode: off", self)
         self.custom_mode_button.setObjectName("customModeButton")
         self.custom_mode_button.setCheckable(True)
@@ -151,7 +167,7 @@ class MenuWindow(QMainWindow):
         self.custom_mode_button.clicked.connect(lambda: self.custom_mode_button_pressed())
 
         self.submit_button = QPushButton("Submit", self)
-        self.submit_button.setGeometry(600, 850, 200, 50)  # 550, 900, 150, 30
+        self.submit_button.setGeometry(600, 900, 200, 50)  # 550, 900, 150, 30
         self.submit_button.clicked.connect(lambda: self.on_submit_all())
 
     def create_options(self):
@@ -320,6 +336,26 @@ class MenuWindow(QMainWindow):
         self.combo_boxes["ID Type"].setEnabled(True)
         self.custom_mode_button.setText("Custom Mode: off")
 
+    def on_upload_output_file(self):
+        initial_dir = os.getcwd()
+        fname, _ = QFileDialog.getSaveFileName(None, 'Save', initial_dir, "Text Files (*.txt)")
+        if fname:
+            try:
+                with open(fname, 'w') as f:
+                    utils.logger_config.OUTPUT_FILE = fname
+                    self.checkbox_values["Config"] = fname
+                    self.update_value("Config", fname)
+            except PermissionError:
+                print("Error: You don't have permission to write to this location.")
+            except Exception as e:
+                print(f"An unexpected error occurred: {e}")
+
+    def on_delete_output_file(self):
+        # os.remove(utils.logger_config.OUTPUT_FILE)
+        utils.logger_config.OUTPUT_FILE = "output.txt"
+        self.checkbox_values["Config"] = ""
+        self.update_value("Config", "")
+
     def handle_custom_topology(self):
         self.number_input.setText("1")
         self.number_input.setEnabled(False)
@@ -336,7 +372,7 @@ class MenuWindow(QMainWindow):
         Handle the final submission of all settings and save them to a JSON file.
         """
         logger.debug(f"Checkbox values are: {self.checkbox_values}")
-        if any([value == "" for key, value in self.checkbox_values.items() if key != "Topology File"]):
+        if any([value == "" for key, value in self.checkbox_values.items() if key not in {"Topology File", "Config"}]):
             QMessageBox.warning(self, 'Error', 'Please fill in all the fields before submitting.', QMessageBox.Ok)
             return
         if self.checkbox_values["Topology File"] == '' and (
