@@ -1,4 +1,5 @@
 import json
+import os
 import threading
 import sys
 import time
@@ -6,7 +7,6 @@ import json
 import argparse
 
 from utils.exceptions import *
-from utils.logger_config import logger
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import QTimer
@@ -16,7 +16,6 @@ import simulator.runModule as runModule
 import simulator.communication as communication
 import simulator.initializationModule as initializationModule
 import simulator.MainMenu as MainMenu
-from simulator.MainMenu import NETWORK_VARIABLES
 import visualizations.graphVisualization as graphVisualization
 OUTPUT_FILE = './output.txt'
 
@@ -32,7 +31,7 @@ def load_network_variables():
         json.JSONDecodeError: If the JSON is improperly formatted.
     """
     try:
-        with open(NETWORK_VARIABLES, 'r') as f:
+        with open(MainMenu.NETWORK_VARIABLES, 'r') as f:
             return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         return {}
@@ -75,7 +74,6 @@ def initializeSimulator(no_GUI):
             break
 
 
-
 def runSimulator(network: initializationModule.Initialization, comm: communication.Communication,
                  network_variables: dict, start_time, for_testing=False):
     """
@@ -115,6 +113,14 @@ def runSimulator(network: initializationModule.Initialization, comm: communicati
     logger.summary("--- Algorithm Run Time : %s seconds ---" % (algorithm_run_time))
 
 
+def json_file_type(file_path):
+    if not os.path.isfile(file_path):
+        raise argparse.ArgumentTypeError(f"File '{file_path}' does not exist.")
+    if not file_path.lower().endswith(".json"):
+        raise argparse.ArgumentTypeError(f"File '{file_path}' is not a .json file.")
+    return file_path
+
+
 def main():
     """
     Main entry point for the simulator. Redirects standard output to a log file and runs the simulator.
@@ -123,9 +129,12 @@ def main():
     parser.add_argument("--debug", action="store_true")
     parser.add_argument("--testing", action="store_true")
     parser.add_argument("--no-GUI", action="store_true")
+    parser.add_argument("--config", type=json_file_type, help="Path to the JSON config file")
     args = parser.parse_args()
     if args.debug:
         loggerConfig.output_debug()
+    if args.config:
+        MainMenu.NETWORK_VARIABLES = args.config
 
     #sys.stdout = open(OUTPUT_FILE, "w")
     logger.info("Starting the simulator")
