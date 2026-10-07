@@ -92,7 +92,7 @@ def sync_run(network: initializationModule.Initialization, comm: communication.C
             # Get messages for the current computer from the dictionary and clear the key
             current_messages = network.message_queue.get_messages_for_specific_dest(comp.id, current_round)
             #logger.info("Current messages for computer %s: %s", comp.id, current_messages)
-            network.message_queue.clear_key(comp.id)
+            network.message_queue.clear_key(comp.id, current_round)
 
             # Update received message count for each message
             comp.update_received_msg_count(len(current_messages))
