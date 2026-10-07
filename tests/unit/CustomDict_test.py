@@ -18,9 +18,9 @@ def create_helper_dict():
     return cd, msg1, msg2, msg3
 
 
-@pytest.mark.test_id("CD-01")
 def test_initial_state():
     """
+    CD-01
     Verify that a new CustomDict is empty.
     """
     cd = CustomDict()
@@ -28,9 +28,9 @@ def test_initial_state():
     assert cd.empty()
 
 
-@pytest.mark.test_id("CD-02")
 def test_push_increases_size():
     """
+    CD-02
     Verify that pushing messages into the dictionary works.
     """
     cd, _, _, _ = create_helper_dict()
@@ -38,9 +38,9 @@ def test_push_increases_size():
     assert not cd.empty()
 
 
-@pytest.mark.test_id("CD-03")
 def test_contains():
     """
+    CD-03
     Verify that contains(msg) works properly whether the message is in the dictionary or not.
     """
     cd, _, msg2, _ = create_helper_dict()
@@ -49,9 +49,9 @@ def test_contains():
     assert not cd.contains(msg_not)
 
 
-@pytest.mark.test_id("CD-04")
 def test_remove():
     """
+    CD-04
     Verify that removing a message from the dictionary really removes it.
     """
     cd, msg1, _, _ = create_helper_dict()
@@ -60,9 +60,9 @@ def test_remove():
     assert cd.size() == 2
 
 
-@pytest.mark.test_id("CD-05")
 def test_remove_non_existent():
     """
+    CD-05
     Verifies that removing a message not in the dictionary doesn't affect it.
     """
     cd, _, _, _ = create_helper_dict()
@@ -71,9 +71,9 @@ def test_remove_non_existent():
     assert cd.size() == 3
 
 
-@pytest.mark.test_id("CD-06")
 def test_get_messages_for_specific_dest():
     """
+    CD-06
     Verify that getting messages for a specific destination returns all of them.
     """
     cd, _, msg2, _ = create_helper_dict()
@@ -85,9 +85,9 @@ def test_get_messages_for_specific_dest():
     assert msg4 in msgs
 
 
-@pytest.mark.test_id("CD-07")
 def test_get_messages_for_dest_empty_result():
     """
+    CD-07
     Verify that getting messages for a non-existent destination returns an empty list.
     """
     cd, _, _, _ = create_helper_dict()
@@ -95,9 +95,9 @@ def test_get_messages_for_dest_empty_result():
     assert msgs == []
 
 
-@pytest.mark.test_id("CD-08")
 def test_get_all_messages():
     """
+    CD-08
     Verify that getting all the messages returns all of them.
     """
     cd, msg1, msg2, msg3 = create_helper_dict()
@@ -106,9 +106,9 @@ def test_get_all_messages():
     assert set(all_msgs) == {msg1, msg2, msg3}
 
 
-@pytest.mark.test_id("CD-09")
 def test_clear_key():
     """
+    CD-09
     Verify that clearing a specific (dest, round) key removes only its messages.
     """
     cd, msg1, msg2, msg3 = create_helper_dict()
@@ -122,9 +122,9 @@ def test_clear_key():
     assert cd.contains(msg3)
 
 
-@pytest.mark.test_id("CD-10")
 def test_clear():
     """
+    CD-10
     Verify that clearing the dictionary empties it.
     """
     cd, _, _, _ = create_helper_dict()
