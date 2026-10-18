@@ -3,6 +3,7 @@ Main module to run the network simulation.
 
 This module initializes the network, runs the algorithms on each computer, and manages the message queue for the simulation.
 """
+import json
 
 import simulator.initializationModule as initializationModule
 import simulator.communication as communication
@@ -13,6 +14,7 @@ from simulator.errorModule import log_all_error_statistics
 import psutil
 import sys
 import time
+
 
 def initiateRun(network: initializationModule.Initialization, comm: communication.Communication, sync: str):
     """
@@ -60,6 +62,7 @@ def async_run(network: initializationModule.Initialization, comm: communication.
 
     logger.info("************************************************************************************")
     logger.info("Async run completed")  
+
 
 def sync_run(network: initializationModule.Initialization, comm: communication.Communication):
     """
@@ -113,8 +116,6 @@ def sync_run(network: initializationModule.Initialization, comm: communication.C
     logger.info("sync run completed")
 
 
-
-
 def log_statistics(network: initializationModule.Initialization):
     """
     Logs the statistics of the network after the simulation run.
@@ -124,10 +125,12 @@ def log_statistics(network: initializationModule.Initialization):
     """
     logger.summary("************************************************************************************")
     logger.summary("Network Statistics:")
+    data = dict()
 
     # 1. Basic network statistics
     logger.summary("\n\nBasic Network Statistics:\n")
     logger.summary("   Total computers: %s", len(network.connected_computers))
+    data["Total Computers"] = len(network.connected_computers)
     # logger.info("   Real-time seconds elapsed: %s seconds", time.time() - network.start_time)
 
     # 2. Message statistics
@@ -136,6 +139,10 @@ def log_statistics(network: initializationModule.Initialization):
     logger.summary("   Total messages received: %s", network.message_queue.total_messages_received)
     logger.summary("   Messages lost: %s", network.message_queue.total_messages_sent - network.message_queue.total_messages_received)
     logger.summary("   Corrupted messages: %s", network.message_queue.corrupted_messages if hasattr(network.message_queue, 'corrupted_messages') else 0)
+    data.update({"Total messages sent": network.message_queue.total_messages_sent,
+                 "Total messages received": network.message_queue.total_messages_received,
+                 "Corrupted messages": network.message_queue.corrupted_messages if hasattr(network.message_queue, 'corrupted_messages') else 0
+                 })
 
     # 3. Node communication statistics
     logger.summary("\n\nNode Communication Statistics:\n")
@@ -162,6 +169,7 @@ def log_statistics(network: initializationModule.Initialization):
     #         if collapse_times:
     #             logger.info("   First collapse time: %d", min(collapse_times))
     #             logger.info("   Last collapse time: %d", max(collapse_times))
+    data["States"] = [comp.state.value for comp in network.connected_computers]
 
     # 5. System resource statistics
     logger.summary("\n\nSystem Resource Statistics:\n")
@@ -194,4 +202,9 @@ def log_statistics(network: initializationModule.Initialization):
     log_all_error_statistics()
     logger.summary("\nEnd of Error Module Statistics\n")
     logger.summary("\nOutputs:\n%s", [comp.outputs for comp in network.network_dict.values()])
+    data["Inputs"] = [comp.inputs for comp in network.network_dict.values()]
+    data["Outputs"] = [comp.outputs for comp in network.network_dict.values()]
+
+    with open("results.json", "w") as f:
+        json.dump(data, f, indent=4)
     logger.summary("************************************************************************************")
