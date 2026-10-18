@@ -121,7 +121,7 @@ def json_file_type(file_path):
     return file_path
 
 
-def main():
+def main(argv=None):
     """
     Main entry point for the simulator. Redirects standard output to a log file and runs the simulator.
     """
@@ -130,7 +130,7 @@ def main():
     parser.add_argument("--testing", action="store_true")
     parser.add_argument("--no-GUI", action="store_true")
     parser.add_argument("--config", type=json_file_type, help="Path to the JSON config file")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     if args.debug:
         loggerConfig.output_debug()
     if args.config:
