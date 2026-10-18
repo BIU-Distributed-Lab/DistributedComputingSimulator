@@ -41,10 +41,12 @@ class CustomDict:
             message (Message): The message to remove.
         """
         dest_id = message.dest_id
-        if dest_id in self.dict:
-            self.dict[dest_id].remove(message)
-            if not self.dict[dest_id]:
-                del self.dict[dest_id]
+        round = message.arrival_time
+        key = (dest_id, round)
+        if key in self.dict:
+            self.dict[key].remove(message)
+            if not self.dict[key]:
+                del self.dict[key]
 
     def contains(self, message: Message) -> bool:
         """
@@ -57,7 +59,9 @@ class CustomDict:
             bool: True if the dictionary contains the message, False otherwise.
         """
         dest_id = message.dest_id
-        return dest_id in self.dict and message in self.dict[dest_id]
+        round = message.arrival_time
+        key = (dest_id, round)
+        return key in self.dict and message in self.dict[key]
 
     def empty(self) -> bool:
         """
@@ -99,15 +103,16 @@ class CustomDict:
         self.total_messages_received += len(self.dict.get(key, []))
         return self.dict.get(key, [])
 
-    def clear_key(self, dest_id):
+    def clear_key(self, dest_id, round):
         """
         Removes the key from the dictionary.
 
         Args:
             dest_id (int): The destination ID to remove.
         """
-        if dest_id in self.dict:
-            del self.dict[dest_id]
+        key = (dest_id, round)
+        if key in self.dict:
+            del self.dict[key]
 
     def get_all_messages(self) -> list[Message]:
         """
