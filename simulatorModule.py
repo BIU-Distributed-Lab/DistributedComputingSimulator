@@ -1,3 +1,4 @@
+import glob
 import json
 import os
 import threading
@@ -113,12 +114,53 @@ def runSimulator(network: initializationModule.Initialization, comm: communicati
     logger.summary("--- Algorithm Run Time : %s seconds ---" % (algorithm_run_time))
 
 
-def json_file_type(file_path):
-    if not os.path.isfile(file_path):
-        raise argparse.ArgumentTypeError(f"File '{file_path}' does not exist.")
-    if not file_path.lower().endswith(".json"):
-        raise argparse.ArgumentTypeError(f"File '{file_path}' is not a .json file.")
-    return file_path
+def json_file_or_dir_type(path):
+    """
+    Validates that the path exists and identifies if it is a directory, .json file or neither.
+
+    Args:
+        path (str): The path that is to be checked.
+
+    Returns:
+        tuple[str, str]: A tuple containing the path and its type ("dir" or "file").
+
+    Raises:
+        argparse.ArgumentTypeError: If the path does not exist or is a file without a .json extension.
+    """
+    if not os.path.exists(path):
+        raise argparse.ArgumentTypeError(f"The path '{path}' does not exist.")
+
+    if os.path.isdir(path):
+        return path, "dir"
+
+    if not path.lower().endswith(".json"):
+        raise argparse.ArgumentTypeError(f"The file '{path}' is not a .json file.")
+    return path, "file"
+
+
+def run_config_folder(remaining_argv, path):
+    """
+    Finds all .json files in a directory and executes the main program for each.
+
+    Args:
+        remaining_argv (list[str]): The command-line arguments except for --config.
+        path (str): The path to the directory containing the .json files.
+
+    Returns:
+        dict[str, any]: A dictionary mapping filenames to their main execution results,
+            or None if no files are found.
+    """
+    json_files = glob.glob(os.path.join(path, "*.json"))
+    if not json_files:
+        print(f"Warning: No .json files found in '{path}'.")
+        return
+
+    all_results = {}
+    for file_path in json_files:
+        modified_argv = ["--config", file_path] + remaining_argv
+        filename = os.path.basename(file_path)
+        all_results[filename] = main(modified_argv)
+    return all_results
 
 
 def main(argv=None):
@@ -126,15 +168,26 @@ def main(argv=None):
     Main entry point for the simulator. Redirects standard output to a log file and runs the simulator.
     """
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--config",
+        type=json_file_or_dir_type,
+        help="Path to a single JSON config file OR a directory containing JSON files"
+    )
+    arg_config, remaining_argv = parser.parse_known_args(argv)
+    if arg_config:
+        path, path_type = arg_config.config
+        if path_type == "file":
+            MainMenu.NETWORK_VARIABLES = path
+        else:
+            return run_config_folder(remaining_argv, path)
+
     parser.add_argument("--debug", action="store_true")
     parser.add_argument("--testing", action="store_true")
     parser.add_argument("--no-GUI", action="store_true")
-    parser.add_argument("--config", type=json_file_type, help="Path to the JSON config file")
-    args = parser.parse_args(argv)
+
+    args = parser.parse_args(remaining_argv)
     if args.debug:
         loggerConfig.output_debug()
-    if args.config:
-        MainMenu.NETWORK_VARIABLES = args.config
 
     #sys.stdout = open(OUTPUT_FILE, "w")
     logger.info("Starting the simulator")
