@@ -52,9 +52,9 @@ class Initialization:
             self.root_selection()
             self.create_connected_computers()
             self.network_dict = {comp.id: comp for comp in self.connected_computers}
-            self.update_output_file()
 
         # always
+        self.update_output_file()
         loggerConfig.output_to_file(self.logging_type)  # add logger to .txt file.
         self.message_queue = CustomDict() if network_variables['Sync'] == "Sync" else CustomMinHeap()
         self.node_values_change = []  # for graph display
@@ -201,6 +201,7 @@ class Initialization:
             self.algorithm_path = network_variables.get('Algorithm', 'no_alg_provided')
             self.logging_type = network_variables.get('Logging', 'Short')
             self.sync = network_variables.get('Sync')
+            self.output_file = network_variables.get('Output File', 'output.txt')
 
             # check if graph is connected if not return to main menu
             connected = self.is_connected()
@@ -229,7 +230,7 @@ class Initialization:
         self.algorithm_path = network_variables_data.get('Algorithm', 'no_alg_provided')
         self.logging_type = network_variables_data.get('Logging', 'Short')
         self.sync = network_variables_data.get('Sync')
-        self.output_file = network_variables_data.get('Output File')
+        self.output_file = network_variables_data.get('Output File', 'output.txt')
 
     def __str__(self) -> list:
         """
